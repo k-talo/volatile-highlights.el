@@ -7,7 +7,7 @@
 ;;          14 March   2010. (re-written as library `volatile-highlights.el')
 ;; Keywords: emulations convenience wp
 ;; Revision: $Id$
-;; URL: http://www.emacswiki.org/emacs/download/volatile-highlights.e
+;; URL: http://www.emacswiki.org/emacs/download/volatile-highlights.el
 ;; GitHub: http://github.com/k-talo/volatile-highlights.el
 
 ;; This file is not part of GNU Emacs.
