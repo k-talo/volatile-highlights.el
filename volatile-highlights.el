@@ -1,4 +1,4 @@
-;; volatile-highlights.el -- Minor mode for visual feedback on some operations.
+;;; volatile-highlights.el -- Minor mode for visual feedback on some operations.
 
 ;; Copyright (C) 2001, 2010 K-taro Miyazaki, all rights reserved.
 
