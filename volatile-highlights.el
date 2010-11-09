@@ -74,11 +74,15 @@
 ;;
 ;;   `M-x customize-group RET volatile-highlights RET'
 
+
 ;;; Change Log:
+
+;;  v1.1, Tue Nov  9 20:36:09 2010 JST
+;;   - Fixed a bug that mode toggling feature was not working.
 
 ;;; Code:
 
-(defconst vhl/version "1.0")
+(defconst vhl/version "1.1")
 
 (eval-when-compile
   (require 'cl)
