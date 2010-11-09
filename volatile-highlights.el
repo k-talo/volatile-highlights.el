@@ -82,9 +82,23 @@
 
 (eval-when-compile
   (require 'cl)
-  (require 'easy-mmode))
+  (require 'easy-mmode)
+  (require 'advice))
 
 (provide 'volatile-highlights)
+
+
+;;;============================================================================
+;;;
+;;;  Private Variables.
+;;;
+;;;============================================================================
+
+(defconst vhl/.xemacsp (string-match "XEmacs" emacs-version)
+  "A flag if the emacs is xemacs or not.")
+
+(defvar vhl/.hl-lst nil
+  "List of volatile highlights.")
 
 
 ;;;============================================================================
@@ -115,8 +129,7 @@
  :global t
  :init-value nil
  :lighter " VHl"
- (if (or (not (boundp 'smooth-scroll-mode))
-         smooth-scroll-mode)
+ (if volatile-highlights-mode
      (vhl/load-extensions)
    (vhl/unload-extensions)))
 
@@ -164,20 +177,7 @@ be used as the value."
 (defun vhl/force-clear-all ()
   "Force clear all volatile highlights in current buffer."
   (interactive)
-  (vhl/force-clear-all-hl))
-
-
-;;;============================================================================
-;;;
-;;;  Private Variables.
-;;;
-;;;============================================================================
-
-(defconst vhl/.xemacsp (string-match "XEmacs" emacs-version)
-  "A flag if the emacs is xemacs or not.")
-
-(defconst vhl/.hl-lst nil
-  "List of volatile highlights.")
+  (vhl/.force-clear-all-hl))
 
 
 ;;;============================================================================
@@ -277,8 +277,7 @@ be used as the value."
 
 (defun vhl/unload-extension (sym)
   (let ((fn-off (intern (format "vhl/ext/%s/off" sym))))
-    (if (and (boundp cust-name)
-             (functionp fn-off))
+    (if (functionp fn-off)
         (apply fn-off nil)
       (message "[vhl] No unload function for extension  `%s'" sym))))
 
