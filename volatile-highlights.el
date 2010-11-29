@@ -85,7 +85,7 @@
 
 ;;; Code:
 
-(defconst vhl/version "1.1")
+(defconst vhl/version "1.2")
 
 (eval-when-compile
   (require 'cl)
