@@ -77,6 +77,8 @@
 
 ;;; Change Log:
 
+;;   - In `vhl/ext/occur', highlight all occurrences.
+;;
 ;;  v1.1, Tue Nov  9 20:36:09 2010 JST
 ;;   - Fixed a bug that mode toggling feature was not working.
 
@@ -421,35 +423,45 @@ be used as the value."
   "Turn on volatile highlighting for `occur'."
   (interactive)
   
-  (lexical-let ((*occur-str* nil))
+  (lexical-let ((*occur-str* nil)) ;; Text in current line.
     (defun vhl/ext/occur/.pre-hook-fn ()
       (save-excursion
         (let* ((bol (progn (beginning-of-line) (point)))
                (eol (progn (end-of-line) (point)))
-               (bos (text-property-any bol eol 'occur-match t))
-               (eos (next-single-property-change bos 'occur-match)))
-          (setq *occur-str* (and bos eos
-                                 (buffer-substring bos eos))))))
+               (bos (text-property-any bol eol 'occur-match t)))
+          (setq *occur-str* (and bos eol
+                                 (buffer-substring bos eol))))))
 
     (defun vhl/ext/occur/.post-hook-fn ()
       (let ((marker (and *occur-str*
-                         (get-text-property 0 'occur-target *occur-str*))))
+                         (get-text-property 0 'occur-target *occur-str*)))
+            (len (length *occur-str*))
+            (ptr 0)
+            (be-lst nil))
         (when marker
+          ;; Detect position of each occurrence by scanning face
+          ;; `list-matching-lines-face' put on them.
+          (while (and ptr
+                      (setq ptr (text-property-any ptr len
+                                                   'face
+                                                   list-matching-lines-face
+                                                   *occur-str*)))
+            (let ((beg ptr)
+                  (end (or (setq ptr
+                                 (next-single-property-change
+                                  ptr 'face *occur-str*))
+                           ;; Occurrence ends at eol.
+                           len)))
+              (push (list beg end)
+                    be-lst)))
+          ;; Put volatile highlights on occurrences.
           (with-current-buffer (marker-buffer marker)
-            (let* ((bos (marker-position marker))
-                   (eos (+ bos (length *occur-str*))))
-              (mapcar (lambda (ov)
-                        (when (overlay-get ov 'invisible)
-                          (save-excursion
-                            (goto-char (overlay-start ov))
-                            (beginning-of-line)
-                            (setq bos (min bos (point)))
-                            (goto-char (overlay-end ov))
-                            (end-of-line)
-                            (setq eos (max eos (point)))
-                            )))
-                      (overlays-at bos))
-              (vhl/add bos eos))))))
+            (let* ((bol (marker-position marker)))
+              (dolist (be be-lst)
+                (vhl/add (+ bol (nth 0 be))
+                         (+ bol (nth 1 be))
+                         nil
+                         list-matching-lines-face)))))))
     
       
     (defadvice occur-mode-goto-occurrence (before vhl/ext/occur/pre-hook (&optional event))
