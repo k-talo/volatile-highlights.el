@@ -77,6 +77,7 @@
 
 ;;; Change Log:
 
+;;  v1.2, Tue Nov 30 01:07:48 2010 JST
 ;;   - In `vhl/ext/occur', highlight all occurrences.
 ;;
 ;;  v1.1, Tue Nov  9 20:36:09 2010 JST
