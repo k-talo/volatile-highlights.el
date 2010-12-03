@@ -77,6 +77,9 @@
 
 ;;; Change Log:
 
+;;   - Fixed a bug that highlights won't be appear when
+;;     occurrences is in folded line.
+;;
 ;;  v1.2, Tue Nov 30 01:07:48 2010 JST
 ;;   - In `vhl/ext/occur', highlight all occurrences.
 ;;
