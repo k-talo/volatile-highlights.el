@@ -459,10 +459,27 @@ be used as the value."
           (with-current-buffer (marker-buffer marker)
             (let* ((bol (marker-position marker)))
               (dolist (be be-lst)
-                (vhl/add (+ bol (nth 0 be))
-                         (+ bol (nth 1 be))
-                         nil
-                         list-matching-lines-face)))))))
+                (let ((pt-beg (+ bol (nth 0 be)))
+                      (pt-end (+ bol (nth 1 be))))
+                  ;; When the occurrence is in folded line,
+                  ;; put highlight over whole line which
+                  ;; contains folded part.
+                  (mapcar (lambda (ov)
+                            (when (overlay-get ov 'invisible)
+                              (message "INVISIBLE: %s" ov)
+                              (save-excursion
+                                (goto-char (overlay-start ov))
+                                (beginning-of-line)
+                                (setq pt-beg (min pt-beg (point)))
+                                (goto-char (overlay-end ov))
+                                (end-of-line)
+                                (setq pt-end (max pt-end (point))))))
+                          (overlays-at pt-beg))
+                  
+                  (vhl/add pt-beg
+                           pt-end
+                           nil
+                           list-matching-lines-face))))))))
     
       
     (defadvice occur-mode-goto-occurrence (before vhl/ext/occur/pre-hook (&optional event))
