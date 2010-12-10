@@ -69,7 +69,20 @@
 ;;      Volatile highlights will be put on the occurrence which is selected
 ;;      by `occur-mode-goto-occurrence' or `occur-mode-display-occurrence'.
 ;;
-;; Highlighting support for each commands can be turned on/off individually
+;;    - Non incremental search operations:
+;;      Volatile highlights will be put on the the text found by
+;;      commands listed below:
+;;
+;;        `nonincremental-search-forward'
+;;        `nonincremental-search-backward'
+;;        `nonincremental-re-search-forward'
+;;        `nonincremental-re-search-backward'
+;;        `nonincremental-repeat-search-forward'
+;;        `nonincremental-repeat-search-backwar'
+;;        `alien-search/nonincremental/re-search-forward'
+;;        `alien-search/nonincremental/re-search-backward'
+;;
+;; Highlighting support for each operations can be turned on/off individually
 ;; via customization. Also check out the customization group
 ;;
 ;;   `M-x customize-group RET volatile-highlights RET'
@@ -524,5 +537,56 @@ be used as the value."
    'occur-mode-goto-occurrence-other-window 'after 'vhl/ext/occur/post-hook))
 
 (vhl/install-extension 'occur)
+
+
+;;-----------------------------------------------------------------------------
+;; Extension for non-incremental search operations.
+;;   -- Put volatile highlights on the text found by non-incremental search
+;;      operations.
+;;-----------------------------------------------------------------------------
+
+(defmacro vhl/ext/nonincremental-search/.advice-to-vhl (fn)
+  `(when (fboundp (quote ,fn))
+      (defadvice ,fn (after
+                      ,(intern (format "vhl/ext/nonincremental-search/%s"
+                                       fn))
+                      (&rest args))
+        (when ad-return-value
+          (vhl/add (match-beginning 0) (match-end 0) nil 'match)))
+      (ad-activate (quote ,fn))))
+
+(defmacro vhl/ext/nonincremental-search/.disable-advice-to-vhl (fn)
+  `(vhl/disable-advice-if-defined
+    (quote ,fn)
+    'after
+    (quote ,(intern (format "vhl/ext/nonincremental-search/%s" fn)))))
+
+(defun vhl/ext/nonincremental-search/on ()
+  "Turn on volatile highlighting for non-incremental search operations."
+  (interactive)
+  (when (require 'menu-bar nil t)
+    (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-search-forward)
+    (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-search-backward)
+    (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-re-search-forward)
+    (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-re-search-backward)
+    (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-repeat-search-forward)
+    (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-repeat-search-backward))
+  (when (require 'alien-search nil t)
+    (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/nonincremental/re-search-forward)
+    (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/nonincremental/re-search-backward)))
+
+(defun vhl/ext/nonincremental-search/off ()
+  "Turn off volatile highlighting for  non-incremental search operations."
+  (interactive)
+  (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-search-forward)
+  (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-search-backward)
+  (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-re-search-forward)
+  (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-re-search-backward)
+  (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-repeat-search-forward)
+  (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-repeat-search-backward)
+  (vhl/ext/nonincremental-search/.disable-advice-to-vhl alien-search/nonincremental/re-search-forward)
+  (vhl/ext/nonincremental-search/.disable-advice-to-vhl alien-search/nonincremental/re-search-backward))
+
+(vhl/install-extension 'nonincremental-search)
 
 ;;; volatile-highlights.el ends here
