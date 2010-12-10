@@ -572,8 +572,8 @@ be used as the value."
     (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-repeat-search-forward)
     (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-repeat-search-backward))
   (when (require 'alien-search nil t)
-    (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/nonincremental/re-search-forward)
-    (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/nonincremental/re-search-backward)))
+    (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/non-incremental/search-forward)
+    (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/non-incremental/search-backward)))
 
 (defun vhl/ext/nonincremental-search/off ()
   "Turn off volatile highlighting for  non-incremental search operations."
@@ -584,8 +584,8 @@ be used as the value."
   (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-re-search-backward)
   (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-repeat-search-forward)
   (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-repeat-search-backward)
-  (vhl/ext/nonincremental-search/.disable-advice-to-vhl alien-search/nonincremental/re-search-forward)
-  (vhl/ext/nonincremental-search/.disable-advice-to-vhl alien-search/nonincremental/re-search-backward))
+  (vhl/ext/nonincremental-search/.disable-advice-to-vhl alien-search/non-incremental/search-forward)
+  (vhl/ext/nonincremental-search/.disable-advice-to-vhl alien-search/non-incremental/search-backward))
 
 (vhl/install-extension 'nonincremental-search)
 
