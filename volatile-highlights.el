@@ -333,11 +333,11 @@ be used as the value."
     (when insert-p
       (vhl/add beg end))))
 
-(defmacro vhl/give-advise-to-make-vhl-on-changes (fn-name)
+(defmacro vhl/give-advice-to-make-vhl-on-changes (fn-name)
   (let* ((ad-name (intern (concat "vhl/make-vhl-on-"
                                  (format "%s" fn-name)))))
     (or (symbolp fn-name)
-        (error "vhl/give-advise-to-make-vhl-on-changes: `%s' is not type of symbol." fn-name))
+        (error "vhl/give-advice-to-make-vhl-on-changes: `%s' is not type of symbol." fn-name))
     `(progn
        (defadvice ,fn-name (around
                               ,ad-name
@@ -352,7 +352,7 @@ be used as the value."
        (ad-enable-advice (quote ,fn-name) 'around (quote ,ad-name))
        (ad-activate (quote ,fn-name)))))
 
-(defmacro vhl/cancel-advise-to-make-vhl-on-changes (fn-name)
+(defmacro vhl/cancel-advice-to-make-vhl-on-changes (fn-name)
   (let ((ad-name (intern (concat "vhl/make-vhl-on-"
                                  (format "%s" fn-name)))))
     `(vhl/disable-advice-if-defined (quote ,fn-name) 'around (quote ,ad-name))))
@@ -373,13 +373,13 @@ be used as the value."
   "Turn on volatile highlighting for `undo'."
   (interactive)
   
-  (vhl/give-advise-to-make-vhl-on-changes primitive-undo))
+  (vhl/give-advice-to-make-vhl-on-changes primitive-undo))
 
 (defun vhl/ext/undo/off ()
   "Turn off volatile highlighting for `undo'."
   (interactive)
 
-  (vhl/cancel-advise-to-make-vhl-on-changes primitive-undo))
+  (vhl/cancel-advice-to-make-vhl-on-changes primitive-undo))
 
 (vhl/install-extension 'undo)
 
@@ -392,15 +392,15 @@ be used as the value."
   "Turn on volatile highlighting for `yank' and `yank-pop'."
   (interactive)
 
-  (vhl/give-advise-to-make-vhl-on-changes yank)
-  (vhl/give-advise-to-make-vhl-on-changes yank-pop))
+  (vhl/give-advice-to-make-vhl-on-changes yank)
+  (vhl/give-advice-to-make-vhl-on-changes yank-pop))
 
 (defun vhl/ext/yank/off ()
   "Turn off volatile highlighting for `yank' and `yank-pop'."
   (interactive)
 
-  (vhl/cancel-advise-to-make-vhl-on-changes yank)
-  (vhl/cancel-advise-to-make-vhl-on-changes yank-pop))
+  (vhl/cancel-advice-to-make-vhl-on-changes yank)
+  (vhl/cancel-advice-to-make-vhl-on-changes yank-pop))
 
 (vhl/install-extension 'yank)
 
