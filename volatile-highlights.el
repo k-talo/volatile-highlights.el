@@ -90,6 +90,8 @@
 
 ;;; Change Log:
 
+;;  v1.3, Sat Dec 18 16:44:14 2010 JST
+;;   - Added extension for non-incremental search operations.
 ;;   - Fixed a bug that highlights won't be appear when
 ;;     occurrences is in folded line.
 ;;
