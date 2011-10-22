@@ -107,7 +107,7 @@
 
 ;;; Code:
 
-(defconst vhl/version "1.2")
+(defconst vhl/version "1.4")
 
 (eval-when-compile
   (require 'cl)
