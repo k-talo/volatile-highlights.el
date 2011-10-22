@@ -727,4 +727,13 @@ would be listed in english."
 
 (vhl/install-extension 'nonincremental-search)
 
+;;-----------------------------------------------------------------------------
+;; Extension for supporting kill.
+;;   -- Put volatile highlights on the positions where killed text
+;;      used to be.
+;;-----------------------------------------------------------------------------
+
+(vhl/define-extension 'kill 'kill-region)
+(vhl/install-extension 'kill)
+
 ;;; volatile-highlights.el ends here
