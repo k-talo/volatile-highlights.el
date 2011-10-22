@@ -506,18 +506,8 @@ would be listed in english."
 ;;   -- Put volatile highlights on the text inserted by `undo'.
 ;;      (and may be `redo'...)
 ;;-----------------------------------------------------------------------------
-(defun vhl/ext/undo/on ()
-  "Turn on volatile highlighting for `undo'."
-  (interactive)
 
-  (vhl/give-advice-to-make-vhl-on-changes primitive-undo))
-
-(defun vhl/ext/undo/off ()
-  "Turn off volatile highlighting for `undo'."
-  (interactive)
-
-  (vhl/cancel-advice-to-make-vhl-on-changes primitive-undo))
-
+(vhl/define-extension 'undo 'primitive-undo)
 (vhl/install-extension 'undo)
 
 
@@ -525,20 +515,8 @@ would be listed in english."
 ;; Extension for supporting yank/yank-pop.
 ;;   -- Put volatile highlights on the text inserted by `yank' or `yank-pop'.
 ;;-----------------------------------------------------------------------------
-(defun vhl/ext/yank/on ()
-  "Turn on volatile highlighting for `yank' and `yank-pop'."
-  (interactive)
 
-  (vhl/give-advice-to-make-vhl-on-changes yank)
-  (vhl/give-advice-to-make-vhl-on-changes yank-pop))
-
-(defun vhl/ext/yank/off ()
-  "Turn off volatile highlighting for `yank' and `yank-pop'."
-  (interactive)
-
-  (vhl/cancel-advice-to-make-vhl-on-changes yank)
-  (vhl/cancel-advice-to-make-vhl-on-changes yank-pop))
-
+(vhl/define-extension 'yank 'yank 'yank-pop)
 (vhl/install-extension 'yank)
 
 
