@@ -114,8 +114,6 @@
   (require 'easy-mmode)
   (require 'advice))
 
-(provide 'volatile-highlights)
-
 
 ;;;============================================================================
 ;;;
@@ -714,4 +712,5 @@ would be listed in english."
 
 (vhl/install-extension 'nonincremental-search)
 
+(provide 'volatile-highlights)
 ;;; volatile-highlights.el ends here
