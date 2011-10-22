@@ -232,6 +232,7 @@ be used as the value."
 	(setq vhl/.hl-lst
 		  (cons hl vhl/.hl-lst))
 	(add-hook 'pre-command-hook 'vhl/clear-all)))
+(define-obsolete-function-alias 'vhl/add 'vhl/add-range "1.5")
 
 ;;-----------------------------------------------------------------------------
 ;; (vhl/add-position POS &OPTIONAL BUF FACE) => VOID
