@@ -428,7 +428,7 @@ be used as the value."
 (defun vhl/ext/undo/on ()
   "Turn on volatile highlighting for `undo'."
   (interactive)
-  
+
   (vhl/give-advice-to-make-vhl-on-changes primitive-undo))
 
 (defun vhl/ext/undo/off ()
@@ -495,7 +495,7 @@ be used as the value."
 (defun vhl/ext/occur/on ()
   "Turn on volatile highlighting for `occur'."
   (interactive)
-  
+
   (lexical-let ((*occur-str* nil)) ;; Text in current line.
     (defun vhl/ext/occur/.pre-hook-fn ()
       (save-excursion
@@ -551,8 +551,8 @@ be used as the value."
                            pt-end
                            nil
                            list-matching-lines-face))))))))
-    
-      
+
+
     (defadvice occur-mode-goto-occurrence (before vhl/ext/occur/pre-hook (&optional event))
       (vhl/ext/occur/.pre-hook-fn))
     (defadvice occur-mode-goto-occurrence (after vhl/ext/occur/post-hook (&optional event))
@@ -567,7 +567,7 @@ be used as the value."
       (vhl/ext/occur/.pre-hook-fn))
     (defadvice occur-mode-goto-occurrence-other-window (after vhl/ext/occur/post-hook ())
       (vhl/ext/occur/.post-hook-fn))
-  
+
     (ad-activate 'occur-mode-goto-occurrence)
     (ad-activate 'occur-mode-display-occurrence)
     (ad-activate 'occur-mode-goto-occurrence-other-window)))
