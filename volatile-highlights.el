@@ -329,6 +329,36 @@ Has the same optional args as `vhl/add-range'."
 					 (vhl/.clear-hl hl)))
 			  (overlays-in (point-min) (point-max)))))))
 
+(defun vhl/.make-list-string (items)
+  "Makes an English-style list from a list of strings.
+
+Converts a list of strings into a string that lists the items
+separated by commas, as well as the word `and' before the last
+item. In other words, returns a string of the way those items
+would be listed in english."
+  (assert (listp items))
+  (cond ((null items)
+         ;; Zero items
+         "")
+        ((null (cdr items))
+         ;; One item
+         (assert (stringp (first items)))
+         (format "%s" (first items)))
+        ((null (cddr items))
+         ;; Two items
+         (assert (stringp (first items)))
+         (assert (stringp (second items)))
+         (apply 'format "%s and %s" items))
+        ((null (cdddr items))
+         ;; Three items
+         (assert (stringp (first items)))
+         (assert (stringp (second items)))
+         (assert (stringp (third items)))
+         (apply 'format "%s, %s, and %s" items))
+        (t
+         ;; 4 or more items
+         (format "%s, %s" (first items) (make-list-string (rest items))))))
+
 
 ;;;============================================================================
 ;;;
@@ -428,6 +458,41 @@ Has the same optional args as `vhl/add-range'."
   (condition-case c
       (require 'linear-undo)
     (file-error nil)))
+
+;; The following makes it trivial to define simple vhl extensions
+(defmacro vhl/define-extension (name &rest functions)
+  "Define a VHL extension called NAME that applies standard VHL
+  advice to each of FUNCTIONS."
+  (assert (first functions))
+  (let* ((name-string (symbol-name (eval name)))
+         (function-list-string (make-list-string
+                                (mapcar (lambda (f) (format "`%s'" (symbol-name (eval f))))
+                                        functions)))
+         (on-function-name (intern (format "vhl/ext/%s/on" name-string)))
+         (on-body-form (cons
+                        'progn
+                        (mapcar (lambda (f)
+                                  `(vhl/give-advice-to-make-vhl-on-changes ,(eval f)))
+                                functions)))
+         (on-doc-string (format "Turn on volatile highlighting for %s." function-list-string))
+
+         (off-function-name (intern (format "vhl/ext/%s/off" name-string)))
+         (off-body-form (cons
+                         'progn
+                         (mapcar (lambda (f)
+                                   `(vhl/cancel-advice-to-make-vhl-on-changes ,(eval f)))
+                                 functions)))
+         (off-doc-string (format "Turn off volatile highlighting for %s." function-list-string)))
+    `(progn
+       (defun ,on-function-name ()
+         ,on-doc-string
+         (interactive)
+         ,on-body-form)
+       (defun ,off-function-name ()
+         ,off-doc-string
+         (interactive)
+         ,off-body-form)
+       nil)))
 
 
 ;;;============================================================================
