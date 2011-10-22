@@ -519,6 +519,15 @@ would be listed in english."
 (vhl/define-extension 'yank 'yank 'yank-pop)
 (vhl/install-extension 'yank)
 
+;;-----------------------------------------------------------------------------
+;; Extension for supporting kill.
+;;   -- Put volatile highlights on the positions where killed text
+;;      used to be.
+;;-----------------------------------------------------------------------------
+
+(vhl/define-extension 'kill 'kill-region)
+(vhl/install-extension 'kill)
+
 
 ;;-----------------------------------------------------------------------------
 ;; Extension for supporting etags.
@@ -704,14 +713,5 @@ would be listed in english."
     (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/non-incremental/search-backward)))
 
 (vhl/install-extension 'nonincremental-search)
-
-;;-----------------------------------------------------------------------------
-;; Extension for supporting kill.
-;;   -- Put volatile highlights on the positions where killed text
-;;      used to be.
-;;-----------------------------------------------------------------------------
-
-(vhl/define-extension 'kill 'kill-region)
-(vhl/install-extension 'kill)
 
 ;;; volatile-highlights.el ends here
