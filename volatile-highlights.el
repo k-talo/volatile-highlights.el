@@ -126,7 +126,7 @@
 (eval-and-compile
   (defconst vhl/.xemacsp (string-match "XEmacs" emacs-version)
     "A flag if the emacs is xemacs or not."))
-                   
+
 (defvar vhl/.hl-lst nil
   "List of volatile highlights.")
 
@@ -173,7 +173,7 @@
 
 ;; Borrowed from `slime.el'.
 (defun vhl/.face-inheritance-possible-p ()
-  "Return true if the :inherit face attribute is supported." 
+  "Return true if the :inherit face attribute is supported."
   (assq :inherit custom-face-attributes))
 
 (defface vhl/default-face
@@ -215,9 +215,9 @@
 ;;;============================================================================
 
 ;;-----------------------------------------------------------------------------
-;; (vhl/add BEG END &OPTIONAL BUF FACE) => VOID
+;; (vhl/add-range BEG END &OPTIONAL BUF FACE) => VOID
 ;;-----------------------------------------------------------------------------
-(defun vhl/add (beg end &optional buf face)
+(defun vhl/add-range (beg end &optional buf face)
   "Add a volatile highlight to the buffer `BUF' at the position
 specified by `BEG' and `END' using the face `FACE'.
 
@@ -232,6 +232,18 @@ be used as the value."
 	(setq vhl/.hl-lst
 		  (cons hl vhl/.hl-lst))
 	(add-hook 'pre-command-hook 'vhl/clear-all)))
+
+;;-----------------------------------------------------------------------------
+;; (vhl/add-position POS &OPTIONAL BUF FACE) => VOID
+;;-----------------------------------------------------------------------------
+(defun vhl/add-position (pos &rest other-args)
+  "Highlight buffer position POS as a change.
+
+Has the same optional args as `vhl/add-range'."
+  (when (not (zerop (buffer-size)))
+    (when (> pos (buffer-size))
+        (setq pos (- pos 1)))
+    (apply 'vhl/add-range pos (+ pos 1) other-args)))
 
 ;;-----------------------------------------------------------------------------
 ;; (vhl/clear-all) => VOID
@@ -381,8 +393,11 @@ be used as the value."
 
 (defun vhl/.make-vhl-on-change (beg end len-removed)
   (let ((insert-p (zerop len-removed)))
-    (when insert-p
-      (vhl/add beg end))))
+    (if insert-p
+        ;; Highlight the insertion
+        (vhl/add-range beg end)
+      ;; Highlight the position of the deletion
+      (vhl/add-position beg))))
 
 (defmacro vhl/give-advice-to-make-vhl-on-changes (fn-name)
   (let* ((ad-name (intern (concat "vhl/make-vhl-on-"
@@ -475,7 +490,7 @@ be used as the value."
           (len (length tagname)))
       (save-excursion
         (search-forward tagname)
-        (vhl/add (- (point) len) (point)))))
+        (vhl/add-range (- (point) len) (point)))))
   (ad-activate 'find-tag))
 
 (defun vhl/ext/etags/off ()
@@ -546,11 +561,11 @@ be used as the value."
                         (goto-char (overlay-end ov))
                         (end-of-line)
                         (setq pt-end (max pt-end (point))))))
-                  
-                  (vhl/add pt-beg
-                           pt-end
-                           nil
-                           list-matching-lines-face))))))))
+
+                  (vhl/add-range pt-beg
+                                 pt-end
+                                 nil
+                                 list-matching-lines-face))))))))
 
 
     (defadvice occur-mode-goto-occurrence (before vhl/ext/occur/pre-hook (&optional event))
@@ -607,7 +622,7 @@ be used as the value."
                                        fn))
                       (&rest args))
         (when ad-return-value
-          (vhl/add (match-beginning 0) (match-end 0) nil 'match)))
+          (vhl/add-range (match-beginning 0) (match-end 0) nil 'match)))
       (ad-activate (quote ,fn))))
 
 (defmacro vhl/ext/nonincremental-search/.disable-advice-to-vhl (fn)
