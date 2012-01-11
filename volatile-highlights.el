@@ -482,17 +482,16 @@ be used as the value."
                   ;; When the occurrence is in folded line,
                   ;; put highlight over whole line which
                   ;; contains folded part.
-                  (mapcar (lambda (ov)
-                            (when (overlay-get ov 'invisible)
-                              (message "INVISIBLE: %s" ov)
-                              (save-excursion
-                                (goto-char (overlay-start ov))
-                                (beginning-of-line)
-                                (setq pt-beg (min pt-beg (point)))
-                                (goto-char (overlay-end ov))
-                                (end-of-line)
-                                (setq pt-end (max pt-end (point))))))
-                          (overlays-at pt-beg))
+                  (dolist (ov (overlays-at pt-beg))
+                    (when (overlay-get ov 'invisible)
+                      ;;(message "INVISIBLE: %s" ov)
+                      (save-excursion
+                        (goto-char (overlay-start ov))
+                        (beginning-of-line)
+                        (setq pt-beg (min pt-beg (point)))
+                        (goto-char (overlay-end ov))
+                        (end-of-line)
+                        (setq pt-end (max pt-end (point))))))
                   
                   (vhl/add pt-beg
                            pt-end
