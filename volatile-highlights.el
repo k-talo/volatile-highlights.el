@@ -119,11 +119,39 @@
 ;;;
 ;;;============================================================================
 
-(defconst vhl/.xemacsp (string-match "XEmacs" emacs-version)
-  "A flag if the emacs is xemacs or not.")
-
+(eval-when-compile
+  (defconst vhl/.xemacsp (string-match "XEmacs" emacs-version)
+    "A flag if the emacs is xemacs or not."))
+                   
 (defvar vhl/.hl-lst nil
   "List of volatile highlights.")
+
+
+;;;============================================================================
+;;;
+;;;  Suppress compiler warnings regarding to emacs/xemacs private functions.
+;;;
+;;;============================================================================
+(eval-when-compile
+  (dolist (func (cond (vhl/.xemacsp
+                       ;; XXX: Not tested !
+                       '(delete-overlay
+                         make-overlay
+                         overlay-get
+                         overlay-put
+                         overlayp
+                         overlays-in))
+                      (t
+                       '(delete-extent
+                         extent-property
+                         extentp
+                         highlight-extent
+                         make-extent
+                         map-extents
+                         set-extent-face
+                         set-extent-property))))
+      (when (not (fboundp func))
+        (setf (symbol-function func) (lambda (&rest args))))))
 
 
 ;;;============================================================================
