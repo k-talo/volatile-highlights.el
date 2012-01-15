@@ -119,7 +119,7 @@
 ;;;
 ;;;============================================================================
 
-(eval-when-compile
+(eval-and-compile
   (defconst vhl/.xemacsp (string-match "XEmacs" emacs-version)
     "A flag if the emacs is xemacs or not."))
                    
@@ -134,11 +134,13 @@
 ;;;============================================================================
 (eval-when-compile
   (dolist (func (cond (vhl/.xemacsp
-                       ;; XXX: Not tested !
                        '(delete-overlay
                          make-overlay
+                         overlay-end
                          overlay-get
                          overlay-put
+                         overlay-start
+                         overlays-at
                          overlayp
                          overlays-in))
                       (t
@@ -164,12 +166,27 @@
   "Visual feedback on operations."
   :group 'editing)
 
+
+;; Borrowed from `slime.el'.
+(defun vhl/.face-inheritance-possible-p ()
+  "Return true if the :inherit face attribute is supported." 
+  (assq :inherit custom-face-attributes))
+
 (defface vhl/default-face
-  '((t
-     :inherit secondary-selection
-     ))
-  "Face used for volatile highlights."
-  :group 'volatile-highlights)
+  (cond
+   ((or vhl/.xemacsp
+        (vhl/.face-inheritance-possible-p))
+    '((((class color) (background light))
+       (:background "yellow1"))
+      (((class color) (background dark))
+       (:background "SkyBlue4"))
+      (t :inverse-video t)))
+   (t
+    '((t
+       :inherit secondary-selection
+       ))))
+    "Face used for volatile highlights."
+    :group 'volatile-highlights)
 
 
 ;;;============================================================================
@@ -251,7 +268,7 @@ be used as the value."
 	  (setq hl (make-extent beg end buf))
 	  (set-extent-face hl face)
 	  (highlight-extent hl t)
-	  (set-extent-property 'volatile-highlights t))
+	  (set-extent-property hl 'volatile-highlights t))
 	 (t
 	  ;; GNU Emacs
 	  (setq hl (make-overlay beg end buf))
@@ -282,12 +299,12 @@ be used as the value."
   "Force clear all volatile highlights in current buffer."
   (cond
    ;; XEmacs (not tested!)
-   ((fboundp 'map-extents)
+   (vhl/.xemacsp
       (map-extents (lambda (hl maparg)
                      (and (extent-property hl 'volatile-highlights)
 						  (vhl/.clear-hl hl)))))
    ;; GNU Emacs
-   ((fboundp 'overlays-in)
+   (t
 	(save-restriction
 	  (widen)
 	  (mapcar (lambda (hl)
@@ -386,6 +403,11 @@ be used as the value."
   (let ((ad-name (intern (concat "vhl/make-vhl-on-"
                                  (format "%s" fn-name)))))
     `(vhl/disable-advice-if-defined (quote ,fn-name) 'around (quote ,ad-name))))
+
+(defun vhl/require-noerror (feature &optional filename)
+  (condition-case c
+      (require 'linear-undo)
+    (file-error nil)))
 
 
 ;;;============================================================================
@@ -593,28 +615,28 @@ be used as the value."
 (defun vhl/ext/nonincremental-search/on ()
   "Turn on volatile highlighting for non-incremental search operations."
   (interactive)
-  (when (require 'menu-bar nil t)
+  (when (vhl/require-noerror 'menu-bar nil)
     (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-search-forward)
     (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-search-backward)
     (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-re-search-forward)
     (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-re-search-backward)
     (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-repeat-search-forward)
     (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-repeat-search-backward))
-  (when (require 'alien-search nil t)
+  (when (vhl/require-noerror 'alien-search nil)
     (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/non-incremental/search-forward)
     (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/non-incremental/search-backward)))
 
 (defun vhl/ext/nonincremental-search/off ()
   "Turn off volatile highlighting for  non-incremental search operations."
   (interactive)
-  (when (require 'menu-bar nil t)
+  (when (vhl/require-noerror 'menu-bar nil)
     (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-search-forward)
     (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-search-backward)
     (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-re-search-forward)
     (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-re-search-backward)
     (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-repeat-search-forward)
     (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-repeat-search-backward))
-  (when (require 'alien-search nil t)
+  (when (vhl/require-noerror 'alien-search nil)
     (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/non-incremental/search-forward)
     (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/non-incremental/search-backward)))
 
