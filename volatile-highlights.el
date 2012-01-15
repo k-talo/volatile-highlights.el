@@ -90,6 +90,10 @@
 
 ;;; Change Log:
 
+;;  v1.4  Sun Jan 15 20:23:58 2012 JST
+;;   - Suppress compiler warnings regarding to emacs/xemacs private functions.
+;;   - Fixed bugs which occurs to xemacs.
+;;
 ;;  v1.3, Sat Dec 18 16:44:14 2010 JST
 ;;   - Added extension for non-incremental search operations.
 ;;   - Fixed a bug that highlights won't be appear when
