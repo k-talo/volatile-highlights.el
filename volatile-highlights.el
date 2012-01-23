@@ -61,6 +61,10 @@
 ;;      Volatile highlights will be put on the text inserted by `yank'
 ;;      or `yank-pop'.
 ;;
+;;    - `kill-region', `kill-line', any other killing function:
+;;      Volatile highlights will be put at the positions where the
+;;      killed text used to be.
+;;
 ;;    - `find-tag':
 ;;      Volatile highlights will be put on the tag name which was found
 ;;      by `find-tag'.
@@ -91,6 +95,8 @@
 ;;; Change Log:
 
 ;;  v1.5  (progn "EVAL THIS TO INSERT DATE" (kill-sexp -1) (insert (current-time-string) " " (cadr (current-time-zone))))
+;;   - Added extension for highlighting the position where text was
+;;     killed from
 ;;   - Provide a macro `vhl/define-extension' for easily defining new
 ;;     simple extensions with a single line of code. For usage
 ;;     examples, see the definitions of the undo, yank, kill, and
