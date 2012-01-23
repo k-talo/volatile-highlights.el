@@ -65,6 +65,10 @@
 ;;      Volatile highlights will be put at the positions where the
 ;;      killed text used to be.
 ;;
+;;    - `delete-region':
+;;      Same as `kill-region', but not as reliable since
+;;      `delete-region' is an inline function.
+;;
 ;;    - `find-tag':
 ;;      Volatile highlights will be put on the tag name which was found
 ;;      by `find-tag'.
@@ -97,6 +101,8 @@
 ;;  v1.5  (progn "EVAL THIS TO INSERT DATE" (kill-sexp -1) (insert (current-time-string) " " (cadr (current-time-zone))))
 ;;   - Added extension for highlighting the position where text was
 ;;     killed from
+;;   - Added extension for highlighting the position where text was
+;;     deleted from.
 ;;   - Provide a macro `vhl/define-extension' for easily defining new
 ;;     simple extensions with a single line of code. For usage
 ;;     examples, see the definitions of the undo, yank, kill, and
@@ -538,6 +544,17 @@ would be listed in english."
 
 (vhl/define-extension 'kill 'kill-region)
 (vhl/install-extension 'kill)
+
+;;-----------------------------------------------------------------------------
+;; Extension for supporting `delete-region'.
+;;   -- Put volatile highlights on the positions where deleted text
+;;      used to be. This is not so reliable since `delete-region' is
+;;      an inline function and is pre-compiled sans advice into many
+;;      other deletion functions.
+;;-----------------------------------------------------------------------------
+
+(vhl/define-extension 'delete 'delete-region)
+(vhl/install-extension 'delete)
 
 
 ;;-----------------------------------------------------------------------------
