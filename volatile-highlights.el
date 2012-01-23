@@ -90,8 +90,15 @@
 
 ;;; Change Log:
 
+;;  v1.5  (progn "EVAL THIS TO INSERT DATE" (kill-sexp -1) (insert (current-time-string) " " (cadr (current-time-zone))))
+;;   - Provide a macro `vhl/define-extension' for easily defining new
+;;     simple extensions with a single line of code. For usage
+;;     examples, see the definitions of the undo, yank, kill, and
+;;     delete extensions.
+;;
 ;;  v1.4  Sun Jan 15 20:23:58 2012 JST
-;;   - Suppress compiler warnings regarding to emacs/xemacs private functions.
+;;   - Suppress compiler warnings regarding to emacs/xemacs private
+;;     functions.
 ;;   - Fixed bugs which occurs to xemacs.
 ;;
 ;;  v1.3, Sat Dec 18 16:44:14 2010 JST
@@ -107,7 +114,7 @@
 
 ;;; Code:
 
-(defconst vhl/version "1.4")
+(defconst vhl/version "1.5")
 
 (eval-when-compile
   (require 'cl)
