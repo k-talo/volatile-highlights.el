@@ -224,6 +224,15 @@
      (vhl/load-extensions)
    (vhl/unload-extensions)))
 
+
+(defcustom Vhl/highlight-zero-width-ranges nil
+  "If t, highlight the positions of zero-width ranges.
+
+For example, if a deletion is highlighted, then the position
+where the deleted text used to be would be highlighted."
+  :type 'boolean
+  :group 'volatile-highlights)
+
 
 ;;;============================================================================
 ;;;
@@ -257,8 +266,10 @@ be used as the value."
 (defun vhl/add-position (pos &rest other-args)
   "Highlight buffer position POS as a change.
 
-Has the same optional args as `vhl/add-range'."
-  (when (not (zerop (buffer-size)))
+If Vhl/highlight-zero-width-ranges is nil, do nothing.
+
+Optional args are the same as `vhl/add-range'."
+  (when (and Vhl/highlight-zero-width-ranges (not (zerop (buffer-size))))
     (when (> pos (buffer-size))
         (setq pos (- pos 1)))
     (apply 'vhl/add-range pos (+ pos 1) other-args)))
