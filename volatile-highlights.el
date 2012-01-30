@@ -133,6 +133,8 @@
   (require 'easy-mmode)
   (require 'advice))
 
+(provide 'volatile-highlights)
+
 
 ;;;============================================================================
 ;;;
@@ -787,5 +789,4 @@ extensions."
 
 (vhl/install-extension 'nonincremental-search)
 
-(provide 'volatile-highlights)
 ;;; volatile-highlights.el ends here
