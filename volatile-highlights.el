@@ -61,6 +61,14 @@
 ;;      Volatile highlights will be put on the text inserted by `yank'
 ;;      or `yank-pop'.
 ;;
+;;    - `kill-region', `kill-line', any other killing function:
+;;      Volatile highlights will be put at the positions where the
+;;      killed text used to be.
+;;
+;;    - `delete-region':
+;;      Same as `kill-region', but not as reliable since
+;;      `delete-region' is an inline function.
+;;
 ;;    - `find-tag':
 ;;      Volatile highlights will be put on the tag name which was found
 ;;      by `find-tag'.
@@ -90,8 +98,19 @@
 
 ;;; Change Log:
 
+;;  v1.5  (progn "EVAL THIS TO INSERT DATE" (kill-sexp -1) (insert (current-time-string) " " (cadr (current-time-zone))))
+;;   - Added extension for highlighting the position where text was
+;;     killed from
+;;   - Added extension for highlighting the position where text was
+;;     deleted from.
+;;   - Provide a macro `vhl/define-extension' for easily defining new
+;;     simple extensions with a single line of code. For usage
+;;     examples, see the definitions of the undo, yank, kill, and
+;;     delete extensions.
+;;
 ;;  v1.4  Sun Jan 15 20:23:58 2012 JST
-;;   - Suppress compiler warnings regarding to emacs/xemacs private functions.
+;;   - Suppress compiler warnings regarding to emacs/xemacs private
+;;     functions.
 ;;   - Fixed bugs which occurs to xemacs.
 ;;
 ;;  v1.3, Sat Dec 18 16:44:14 2010 JST
@@ -107,7 +126,7 @@
 
 ;;; Code:
 
-(defconst vhl/version "1.2")
+(defconst vhl/version "1.5")
 
 (eval-when-compile
   (require 'cl)
@@ -126,7 +145,7 @@
 (eval-and-compile
   (defconst vhl/.xemacsp (string-match "XEmacs" emacs-version)
     "A flag if the emacs is xemacs or not."))
-                   
+
 (defvar vhl/.hl-lst nil
   "List of volatile highlights.")
 
@@ -173,7 +192,7 @@
 
 ;; Borrowed from `slime.el'.
 (defun vhl/.face-inheritance-possible-p ()
-  "Return true if the :inherit face attribute is supported." 
+  "Return true if the :inherit face attribute is supported."
   (assq :inherit custom-face-attributes))
 
 (defface vhl/default-face
@@ -207,6 +226,15 @@
      (vhl/load-extensions)
    (vhl/unload-extensions)))
 
+
+(defcustom Vhl/highlight-zero-width-ranges nil
+  "If t, highlight the positions of zero-width ranges.
+
+For example, if a deletion is highlighted, then the position
+where the deleted text used to be would be highlighted."
+  :type 'boolean
+  :group 'volatile-highlights)
+
 
 ;;;============================================================================
 ;;;
@@ -215,9 +243,9 @@
 ;;;============================================================================
 
 ;;-----------------------------------------------------------------------------
-;; (vhl/add BEG END &OPTIONAL BUF FACE) => VOID
+;; (vhl/add-range BEG END &OPTIONAL BUF FACE) => VOID
 ;;-----------------------------------------------------------------------------
-(defun vhl/add (beg end &optional buf face)
+(defun vhl/add-range (beg end &optional buf face)
   "Add a volatile highlight to the buffer `BUF' at the position
 specified by `BEG' and `END' using the face `FACE'.
 
@@ -232,6 +260,21 @@ be used as the value."
 	(setq vhl/.hl-lst
 		  (cons hl vhl/.hl-lst))
 	(add-hook 'pre-command-hook 'vhl/clear-all)))
+(define-obsolete-function-alias 'vhl/add 'vhl/add-range "1.5")
+
+;;-----------------------------------------------------------------------------
+;; (vhl/add-position POS &OPTIONAL BUF FACE) => VOID
+;;-----------------------------------------------------------------------------
+(defun vhl/add-position (pos &rest other-args)
+  "Highlight buffer position POS as a change.
+
+If Vhl/highlight-zero-width-ranges is nil, do nothing.
+
+Optional args are the same as `vhl/add-range'."
+  (when (and Vhl/highlight-zero-width-ranges (not (zerop (buffer-size))))
+    (when (> pos (buffer-size))
+        (setq pos (- pos 1)))
+    (apply 'vhl/add-range pos (+ pos 1) other-args)))
 
 ;;-----------------------------------------------------------------------------
 ;; (vhl/clear-all) => VOID
@@ -316,6 +359,36 @@ be used as the value."
 					 (vhl/.clear-hl hl)))
 			  (overlays-in (point-min) (point-max)))))))
 
+(defun vhl/.make-list-string (items)
+  "Makes an English-style list from a list of strings.
+
+Converts a list of strings into a string that lists the items
+separated by commas, as well as the word `and' before the last
+item. In other words, returns a string of the way those items
+would be listed in english."
+  (assert (listp items))
+  (cond ((null items)
+         ;; Zero items
+         "")
+        ((null (cdr items))
+         ;; One item
+         (assert (stringp (first items)))
+         (format "%s" (first items)))
+        ((null (cddr items))
+         ;; Two items
+         (assert (stringp (first items)))
+         (assert (stringp (second items)))
+         (apply 'format "%s and %s" items))
+        ((null (cdddr items))
+         ;; Three items
+         (assert (stringp (first items)))
+         (assert (stringp (second items)))
+         (assert (stringp (third items)))
+         (apply 'format "%s, %s, and %s" items))
+        (t
+         ;; 4 or more items
+         (format "%s, %s" (first items) (make-list-string (rest items))))))
+
 
 ;;;============================================================================
 ;;;
@@ -381,8 +454,11 @@ be used as the value."
 
 (defun vhl/.make-vhl-on-change (beg end len-removed)
   (let ((insert-p (zerop len-removed)))
-    (when insert-p
-      (vhl/add beg end))))
+    (if insert-p
+        ;; Highlight the insertion
+        (vhl/add-range beg end)
+      ;; Highlight the position of the deletion
+      (vhl/add-position beg))))
 
 (defmacro vhl/give-advice-to-make-vhl-on-changes (fn-name)
   (let* ((ad-name (intern (concat "vhl/make-vhl-on-"
@@ -413,6 +489,75 @@ be used as the value."
       (require 'linear-undo)
     (file-error nil)))
 
+(defun vhl/.make-list-string (items)
+  "Makes an English-style list from a list of strings.
+
+Converts a list of strings into a string that lists the items
+separated by commas, as well as the word `and' before the last
+item. In other words, returns a string of the way those items
+would be listed in english.
+
+This is included as a private support function for generating
+lists of symbols to be included docstrings of auto-generated
+extensions."
+  (assert (listp items))
+  (cond ((null items)
+         ;; Zero items
+         "")
+        ((null (cdr items))
+         ;; One item
+         (assert (stringp (first items)))
+         (format "%s" (first items)))
+        ((null (cddr items))
+         ;; Two items
+         (assert (stringp (first items)))
+         (assert (stringp (second items)))
+         (apply 'format "%s and %s" items))
+        ((null (cdddr items))
+         ;; Three items
+         (assert (stringp (first items)))
+         (assert (stringp (second items)))
+         (assert (stringp (third items)))
+         (apply 'format "%s, %s, and %s" items))
+        (t
+         ;; 4 or more items
+         (format "%s, %s" (first items) (make-list-string (rest items))))))
+
+;; The following makes it trivial to define simple vhl extensions
+(defmacro vhl/define-extension (name &rest functions)
+  "Define a VHL extension called NAME that applies standard VHL
+  advice to each of FUNCTIONS."
+  (assert (first functions))
+  (let* ((name-string (symbol-name (eval name)))
+         (function-list-string (vhl/.make-list-string
+                                (mapcar (lambda (f) (format "`%s'" (symbol-name (eval f))))
+                                        functions)))
+         (on-function-name (intern (format "vhl/ext/%s/on" name-string)))
+         (on-body-form (cons
+                        'progn
+                        (mapcar (lambda (f)
+                                  `(vhl/give-advice-to-make-vhl-on-changes ,(eval f)))
+                                functions)))
+         (on-doc-string (format "Turn on volatile highlighting for %s." function-list-string))
+
+         (off-function-name (intern (format "vhl/ext/%s/off" name-string)))
+         (off-body-form (cons
+                         'progn
+                         (mapcar (lambda (f)
+                                   `(vhl/cancel-advice-to-make-vhl-on-changes ,(eval f)))
+                                 functions)))
+         (off-doc-string (format "Turn off volatile highlighting for %s." function-list-string)))
+    `(progn
+       (defun ,on-function-name ()
+         ,on-doc-string
+         (interactive)
+         ,on-body-form)
+       (defun ,off-function-name ()
+         ,off-doc-string
+         (interactive)
+         ,off-body-form)
+       nil)))
+
 
 ;;;============================================================================
 ;;;
@@ -425,18 +570,8 @@ be used as the value."
 ;;   -- Put volatile highlights on the text inserted by `undo'.
 ;;      (and may be `redo'...)
 ;;-----------------------------------------------------------------------------
-(defun vhl/ext/undo/on ()
-  "Turn on volatile highlighting for `undo'."
-  (interactive)
-  
-  (vhl/give-advice-to-make-vhl-on-changes primitive-undo))
 
-(defun vhl/ext/undo/off ()
-  "Turn off volatile highlighting for `undo'."
-  (interactive)
-
-  (vhl/cancel-advice-to-make-vhl-on-changes primitive-undo))
-
+(vhl/define-extension 'undo 'primitive-undo)
 (vhl/install-extension 'undo)
 
 
@@ -444,21 +579,29 @@ be used as the value."
 ;; Extension for supporting yank/yank-pop.
 ;;   -- Put volatile highlights on the text inserted by `yank' or `yank-pop'.
 ;;-----------------------------------------------------------------------------
-(defun vhl/ext/yank/on ()
-  "Turn on volatile highlighting for `yank' and `yank-pop'."
-  (interactive)
 
-  (vhl/give-advice-to-make-vhl-on-changes yank)
-  (vhl/give-advice-to-make-vhl-on-changes yank-pop))
-
-(defun vhl/ext/yank/off ()
-  "Turn off volatile highlighting for `yank' and `yank-pop'."
-  (interactive)
-
-  (vhl/cancel-advice-to-make-vhl-on-changes yank)
-  (vhl/cancel-advice-to-make-vhl-on-changes yank-pop))
-
+(vhl/define-extension 'yank 'yank 'yank-pop)
 (vhl/install-extension 'yank)
+
+;;-----------------------------------------------------------------------------
+;; Extension for supporting kill.
+;;   -- Put volatile highlights on the positions where killed text
+;;      used to be.
+;;-----------------------------------------------------------------------------
+
+(vhl/define-extension 'kill 'kill-region)
+(vhl/install-extension 'kill)
+
+;;-----------------------------------------------------------------------------
+;; Extension for supporting `delete-region'.
+;;   -- Put volatile highlights on the positions where deleted text
+;;      used to be. This is not so reliable since `delete-region' is
+;;      an inline function and is pre-compiled sans advice into many
+;;      other deletion functions.
+;;-----------------------------------------------------------------------------
+
+(vhl/define-extension 'delete 'delete-region)
+(vhl/install-extension 'delete)
 
 
 ;;-----------------------------------------------------------------------------
@@ -475,7 +618,7 @@ be used as the value."
           (len (length tagname)))
       (save-excursion
         (search-forward tagname)
-        (vhl/add (- (point) len) (point)))))
+        (vhl/add-range (- (point) len) (point)))))
   (ad-activate 'find-tag))
 
 (defun vhl/ext/etags/off ()
@@ -495,7 +638,7 @@ be used as the value."
 (defun vhl/ext/occur/on ()
   "Turn on volatile highlighting for `occur'."
   (interactive)
-  
+
   (lexical-let ((*occur-str* nil)) ;; Text in current line.
     (defun vhl/ext/occur/.pre-hook-fn ()
       (save-excursion
@@ -546,13 +689,13 @@ be used as the value."
                         (goto-char (overlay-end ov))
                         (end-of-line)
                         (setq pt-end (max pt-end (point))))))
-                  
-                  (vhl/add pt-beg
-                           pt-end
-                           nil
-                           list-matching-lines-face))))))))
-    
-      
+
+                  (vhl/add-range pt-beg
+                                 pt-end
+                                 nil
+                                 list-matching-lines-face))))))))
+
+
     (defadvice occur-mode-goto-occurrence (before vhl/ext/occur/pre-hook (&optional event))
       (vhl/ext/occur/.pre-hook-fn))
     (defadvice occur-mode-goto-occurrence (after vhl/ext/occur/post-hook (&optional event))
@@ -567,7 +710,7 @@ be used as the value."
       (vhl/ext/occur/.pre-hook-fn))
     (defadvice occur-mode-goto-occurrence-other-window (after vhl/ext/occur/post-hook ())
       (vhl/ext/occur/.post-hook-fn))
-  
+
     (ad-activate 'occur-mode-goto-occurrence)
     (ad-activate 'occur-mode-display-occurrence)
     (ad-activate 'occur-mode-goto-occurrence-other-window)))
@@ -607,7 +750,7 @@ be used as the value."
                                        fn))
                       (&rest args))
         (when ad-return-value
-          (vhl/add (match-beginning 0) (match-end 0) nil 'match)))
+          (vhl/add-range (match-beginning 0) (match-end 0) nil 'match)))
       (ad-activate (quote ,fn))))
 
 (defmacro vhl/ext/nonincremental-search/.disable-advice-to-vhl (fn)
