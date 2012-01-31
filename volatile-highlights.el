@@ -1,6 +1,6 @@
 ;;; volatile-highlights.el -- Minor mode for visual feedback on some operations.
 
-;; Copyright (C) 2001, 2010 K-taro Miyazaki, all rights reserved.
+;; Copyright (C) 2001, 2010-2012 K-talo Miyazaki, all rights reserved.
 
 ;; Author: K-talo Miyazaki <Keitaro dot Miyazaki at gmail dot com>
 ;; Created: 03 October 2001. (as utility functions in my `.emacs' file.)
@@ -98,9 +98,9 @@
 
 ;;; Change Log:
 
-;;  v1.5  (progn "EVAL THIS TO INSERT DATE" (kill-sexp -1) (insert (current-time-string) " " (cadr (current-time-zone))))
+;;  v1.5  Tue Jan 31 22:19:04 2012 JST
 ;;   - Added extension for highlighting the position where text was
-;;     killed from
+;;     killed from.
 ;;   - Added extension for highlighting the position where text was
 ;;     deleted from.
 ;;   - Provide a macro `vhl/define-extension' for easily defining new
@@ -359,36 +359,6 @@ Optional args are the same as `vhl/add-range'."
 					 (vhl/.clear-hl hl)))
 			  (overlays-in (point-min) (point-max)))))))
 
-(defun vhl/.make-list-string (items)
-  "Makes an English-style list from a list of strings.
-
-Converts a list of strings into a string that lists the items
-separated by commas, as well as the word `and' before the last
-item. In other words, returns a string of the way those items
-would be listed in english."
-  (assert (listp items))
-  (cond ((null items)
-         ;; Zero items
-         "")
-        ((null (cdr items))
-         ;; One item
-         (assert (stringp (first items)))
-         (format "%s" (first items)))
-        ((null (cddr items))
-         ;; Two items
-         (assert (stringp (first items)))
-         (assert (stringp (second items)))
-         (apply 'format "%s and %s" items))
-        ((null (cdddr items))
-         ;; Three items
-         (assert (stringp (first items)))
-         (assert (stringp (second items)))
-         (assert (stringp (third items)))
-         (apply 'format "%s, %s, and %s" items))
-        (t
-         ;; 4 or more items
-         (format "%s, %s" (first items) (make-list-string (rest items))))))
-
 
 ;;;============================================================================
 ;;;
@@ -489,6 +459,8 @@ would be listed in english."
       (require 'linear-undo)
     (file-error nil)))
 
+(eval-and-compile
+;; Utility function by Ryan Thompson.
 (defun vhl/.make-list-string (items)
   "Makes an English-style list from a list of strings.
 
@@ -521,7 +493,7 @@ extensions."
          (apply 'format "%s, %s, and %s" items))
         (t
          ;; 4 or more items
-         (format "%s, %s" (first items) (make-list-string (rest items))))))
+         (format "%s, %s" (first items) (vhl/.make-list-string (rest items)))))))
 
 ;; The following makes it trivial to define simple vhl extensions
 (defmacro vhl/define-extension (name &rest functions)
