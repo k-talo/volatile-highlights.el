@@ -87,8 +87,6 @@
 ;;        `nonincremental-re-search-backward'
 ;;        `nonincremental-repeat-search-forward'
 ;;        `nonincremental-repeat-search-backwar'
-;;        `alien-search/nonincremental/re-search-forward'
-;;        `alien-search/nonincremental/re-search-backward'
 ;;
 ;; Highlighting support for each operations can be turned on/off individually
 ;; via customization. Also check out the customization group
@@ -740,10 +738,7 @@ extensions."
     (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-re-search-forward)
     (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-re-search-backward)
     (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-repeat-search-forward)
-    (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-repeat-search-backward))
-  (when (vhl/require-noerror 'alien-search nil)
-    (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/non-incremental/search-forward)
-    (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/non-incremental/search-backward)))
+    (vhl/ext/nonincremental-search/.advice-to-vhl nonincremental-repeat-search-backward)))
 
 (defun vhl/ext/nonincremental-search/off ()
   "Turn off volatile highlighting for  non-incremental search operations."
@@ -754,10 +749,7 @@ extensions."
     (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-re-search-forward)
     (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-re-search-backward)
     (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-repeat-search-forward)
-    (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-repeat-search-backward))
-  (when (vhl/require-noerror 'alien-search nil)
-    (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/non-incremental/search-forward)
-    (vhl/ext/nonincremental-search/.advice-to-vhl alien-search/non-incremental/search-backward)))
+    (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-repeat-search-backward)))
 
 (vhl/install-extension 'nonincremental-search)
 
