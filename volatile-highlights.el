@@ -1,4 +1,4 @@
-;;; volatile-highlights.el -- Minor mode for visual feedback on some operations.
+;;; volatile-highlights.el --- Minor mode for visual feedback on some operations.
 
 ;; Copyright (C) 2001, 2010-2012 K-talo Miyazaki, all rights reserved.
 
@@ -9,7 +9,7 @@
 ;; Revision: $Id$
 ;; URL: http://www.emacswiki.org/emacs/download/volatile-highlights.el
 ;; GitHub: http://github.com/k-talo/volatile-highlights.el
-;; Version 1.6
+;; Version: 1.6
 
 ;; This file is not part of GNU Emacs.
 
