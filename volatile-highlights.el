@@ -9,6 +9,7 @@
 ;; Revision: $Id$
 ;; URL: http://www.emacswiki.org/emacs/download/volatile-highlights.el
 ;; GitHub: http://github.com/k-talo/volatile-highlights.el
+;; Version 1.6
 
 ;; This file is not part of GNU Emacs.
 
@@ -96,6 +97,13 @@
 
 ;;; Change Log:
 
+;; v1.6 Thu Feb  2 06:59:48 2012 JST
+;;   - Removed extensions for non standard features.
+;;   - Suppress compiler warning "function `vhl/.make-list-string'
+;;     defined multiple times".
+;;   - Fixed compiler error "Symbol's function definition is void:
+;;     vhl/.make-list-string".
+;;
 ;;  v1.5  Tue Jan 31 22:19:04 2012 JST
 ;;   - Added extension for highlighting the position where text was
 ;;     killed from.
@@ -124,7 +132,7 @@
 
 ;;; Code:
 
-(defconst vhl/version "1.5")
+(defconst vhl/version "1.6")
 
 (eval-when-compile
   (require 'cl)
