@@ -97,6 +97,8 @@
 
 ;;; Change Log:
 
+;;   - Fixed a bug required features are not loaded.
+;;
 ;; v1.6 Thu Feb  2 06:59:48 2012 JST
 ;;   - Removed extensions for non standard features.
 ;;   - Suppress compiler warning "function `vhl/.make-list-string'
