@@ -462,7 +462,7 @@ Optional args are the same as `vhl/add-range'."
 
 (defun vhl/require-noerror (feature &optional filename)
   (condition-case c
-      (require 'linear-undo)
+      (require feature)
     (file-error nil)))
 
 (eval-and-compile
