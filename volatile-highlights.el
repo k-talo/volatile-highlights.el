@@ -97,9 +97,10 @@
 
 ;;; Change Log:
 
+;; v1.7  Mon Feb 13 23:31:18 2012 JST
 ;;   - Fixed a bug required features are not loaded.
 ;;
-;; v1.6 Thu Feb  2 06:59:48 2012 JST
+;; v1.6  Thu Feb  2 06:59:48 2012 JST
 ;;   - Removed extensions for non standard features.
 ;;   - Suppress compiler warning "function `vhl/.make-list-string'
 ;;     defined multiple times".
