@@ -97,6 +97,8 @@
 
 ;;; Change Log:
 
+;;   - Added extension for hideshow.
+;;
 ;; v1.7  Mon Feb 13 23:31:18 2012 JST
 ;;   - Fixed a bug required features are not loaded.
 ;;
@@ -763,5 +765,45 @@ extensions."
     (vhl/ext/nonincremental-search/.disable-advice-to-vhl nonincremental-repeat-search-backward)))
 
 (vhl/install-extension 'nonincremental-search)
+
+
+;;-----------------------------------------------------------------------------
+;; Extension for hideshow.
+;;   -- Put volatile highlights on the text blocks which are shown/hidden
+;;      by hideshow.
+;;-----------------------------------------------------------------------------
+
+(defun vhl/ext/hideshow/.activate ()
+  (defadvice hs-show-block (around vhl/ext/hideshow/vhl/around-hook (&optional end))
+    (let* ((bol (save-excursion (progn (beginning-of-line) (point))))
+           (eol (save-excursion (progn (end-of-line) (point))))
+           (ov-folded (dolist (ov (overlays-in bol (1+ eol)))
+                        (when (overlay-get ov 'hs)
+                          (return ov))))
+           (boov (and ov-folded (overlay-start ov-folded)))
+           (eoov (and ov-folded (overlay-end ov-folded))))
+    
+      ad-do-it
+    
+      (when (and boov eoov)
+        (vhl/add-range boov eoov))))
+  (ad-activate 'hs-show-block))
+
+(defun vhl/ext/hideshow/on ()
+  "Turn on volatile highlighting for `hideshow'."
+  (interactive)
+  
+  (cond
+   ((featurep 'hideshow)
+    (vhl/ext/hideshow/.activate))
+   (t
+    (eval-after-load "hideshow" '(vhl/ext/hideshow/.activate)))))
+
+(defun vhl/ext/hideshow/off ()
+  (vhl/disable-advice-if-defined 'hs-show-block
+                                 'after
+                                 'vhl/ext/hideshow/vhl/around-hook))
+
+(vhl/install-extension 'hideshow)
 
 ;;; volatile-highlights.el ends here
