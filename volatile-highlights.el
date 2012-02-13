@@ -10,6 +10,7 @@
 ;; URL: http://www.emacswiki.org/emacs/download/volatile-highlights.el
 ;; GitHub: http://github.com/k-talo/volatile-highlights.el
 ;; Version: 1.7
+;; Contributed by: Ryan Thompson.
 
 ;; This file is not part of GNU Emacs.
 
