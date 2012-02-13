@@ -9,7 +9,7 @@
 ;; Revision: $Id$
 ;; URL: http://www.emacswiki.org/emacs/download/volatile-highlights.el
 ;; GitHub: http://github.com/k-talo/volatile-highlights.el
-;; Version: 1.6
+;; Version: 1.7
 
 ;; This file is not part of GNU Emacs.
 
@@ -135,7 +135,7 @@
 
 ;;; Code:
 
-(defconst vhl/version "1.6")
+(defconst vhl/version "1.7")
 
 (eval-when-compile
   (require 'cl)
