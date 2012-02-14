@@ -9,7 +9,7 @@
 ;; Revision: $Id$
 ;; URL: http://www.emacswiki.org/emacs/download/volatile-highlights.el
 ;; GitHub: http://github.com/k-talo/volatile-highlights.el
-;; Version: 1.7
+;; Version: 1.8
 ;; Contributed by: Ryan Thompson.
 
 ;; This file is not part of GNU Emacs.
@@ -98,6 +98,8 @@
 
 ;;; Change Log:
 
+;; v1.8  Wed Feb 15 00:08:14 2012 JST
+;;   - Added "Contributed by: " line in header.
 ;;   - Added extension for hideshow.
 ;;
 ;; v1.7  Mon Feb 13 23:31:18 2012 JST
@@ -138,7 +140,7 @@
 
 ;;; Code:
 
-(defconst vhl/version "1.7")
+(defconst vhl/version "1.8")
 
 (eval-when-compile
   (require 'cl)
