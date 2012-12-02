@@ -615,7 +615,7 @@ extensions."
   (vhl/disable-advice-if-defined
    'find-tag 'after 'vhl/ext/etags/make-vhl-after-find-tag))
 
-(vhl/install-extension 'etags)
+(eval-after-load 'etags '(vhl/install-extension 'etags))
 
 
 ;;-----------------------------------------------------------------------------
