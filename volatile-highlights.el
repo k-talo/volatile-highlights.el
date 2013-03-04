@@ -98,6 +98,9 @@
 
 ;;; Change Log:
 
+;; v1.9  Tue Mar  5 00:52:35 2013 JST
+;;   - Fixed errors in shell caused by dummy functions.
+;;
 ;; v1.8  Wed Feb 15 00:08:14 2012 JST
 ;;   - Added "Contributed by: " line in header.
 ;;   - Added extension for hideshow.
