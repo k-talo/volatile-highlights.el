@@ -170,6 +170,7 @@
 ;;;
 ;;;============================================================================
 (eval-when-compile
+  (defvar vhl/.dummy-func-lst nil)
   (dolist (func (cond (vhl/.xemacsp
                        '(delete-overlay
                          make-overlay
@@ -190,7 +191,8 @@
                          set-extent-face
                          set-extent-property))))
       (when (not (fboundp func))
-        (setf (symbol-function func) (lambda (&rest args))))))
+        (setf (symbol-function func) (lambda (&rest args)))
+        (setq vhl/.dummy-func-lst (cons func vhl/.dummy-func-lst)))))
 
 
 ;;;============================================================================
@@ -808,5 +810,16 @@ extensions."
                                  'vhl/ext/hideshow/vhl/around-hook))
 
 (vhl/install-extension 'hideshow)
+
+
+;;;============================================================================
+;;;
+;;;  Suppress compiler warnings regarding to emacs/xemacs private functions.
+;;;
+;;;============================================================================
+(eval-when-compile
+  (dolist (func vhl/.dummy-func-lst)
+      (when (fboundp func)
+        (fmakunbound func))))
 
 ;;; volatile-highlights.el ends here
