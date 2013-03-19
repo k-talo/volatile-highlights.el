@@ -98,6 +98,9 @@
 
 ;;; Change Log:
 
+;;   - Suppress compiler warnings regarding to emacs/xemacs private
+;;     functions by file local variable.
+;;
 ;; v1.9  Tue Mar  5 00:52:35 2013 JST
 ;;   - Fixed errors in shell caused by dummy functions.
 ;;
@@ -165,37 +168,6 @@
 
 (defvar vhl/.hl-lst nil
   "List of volatile highlights.")
-
-
-;;;============================================================================
-;;;
-;;;  Suppress compiler warnings regarding to emacs/xemacs private functions.
-;;;
-;;;============================================================================
-(eval-when-compile
-  (defvar vhl/.dummy-func-lst nil)
-  (dolist (func (cond (vhl/.xemacsp
-                       '(delete-overlay
-                         make-overlay
-                         overlay-end
-                         overlay-get
-                         overlay-put
-                         overlay-start
-                         overlays-at
-                         overlayp
-                         overlays-in))
-                      (t
-                       '(delete-extent
-                         extent-property
-                         extentp
-                         highlight-extent
-                         make-extent
-                         map-extents
-                         set-extent-face
-                         set-extent-property))))
-      (when (not (fboundp func))
-        (setf (symbol-function func) (lambda (&rest args)))
-        (setq vhl/.dummy-func-lst (cons func vhl/.dummy-func-lst)))))
 
 
 ;;;============================================================================
@@ -820,9 +792,9 @@ extensions."
 ;;;  Suppress compiler warnings regarding to emacs/xemacs private functions.
 ;;;
 ;;;============================================================================
-(eval-when-compile
-  (dolist (func vhl/.dummy-func-lst)
-      (when (fboundp func)
-        (fmakunbound func))))
+
+;; Local variables:
+;; byte-compile-warnings: (not unresolved)
+;; End:
 
 ;;; volatile-highlights.el ends here
