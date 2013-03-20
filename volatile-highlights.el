@@ -189,7 +189,7 @@
 (defface vhl/default-face
   (cond
    ((or vhl/.xemacsp
-        (vhl/.face-inheritance-possible-p))
+        (not (vhl/.face-inheritance-possible-p)))
     '((((class color) (background light))
        (:background "yellow1"))
       (((class color) (background dark))
