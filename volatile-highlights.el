@@ -9,8 +9,8 @@
 ;; Revision: $Id$
 ;; URL: http://www.emacswiki.org/emacs/download/volatile-highlights.el
 ;; GitHub: http://github.com/k-talo/volatile-highlights.el
-;; Version: 1.8
-;; Contributed by: Ryan Thompson.
+;; Version: 1.10
+;; Contributed by: Ryan Thompson and Le Wang.
 
 ;; This file is not part of GNU Emacs.
 
@@ -98,6 +98,8 @@
 
 ;;; Change Log:
 
+;; v1.10
+;;   - Use inherit in face definition when detected.
 ;;   - Suppress compiler warnings regarding to emacs/xemacs private
 ;;     functions by file local variable.
 ;;
