@@ -36,7 +36,7 @@
 ;; relating to the operations.
 ;;
 ;; All of highlights made by this library will be removed
-;; when any new command is executed.
+;; when any new operation is executed.
 ;;
 ;;
 ;; INSTALLING
@@ -52,6 +52,8 @@
 ;; USING
 ;; =====
 ;; To toggle volatile highlighting, type `M-x volatile-highlights-mode <RET>'.
+;;
+;; While this minor mode is on, a string `VHL' will be displayed on the modeline.
 ;;
 ;; Currently, operations listed below will be highlighted While the minor mode
 ;; `volatile-highlights-mode' is on:

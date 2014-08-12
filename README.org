@@ -12,7 +12,7 @@ brings visual feedback to some operations by highlighting portions
 relating to the operations.
 
 All of highlights made by this library will be removed
-when any new command is executed.
+when any new operation is executed.
 
 
 ** INSTALLING
@@ -34,6 +34,8 @@ To toggle volatile highlighting, type:
 
 : M-x volatile-highlights-mode <RET>
 
+While this minor mode is on, a string `VHL' will be displayed on the modeline.
+
 Currently, operations listed below will be highlighted While the minor mode
 `volatile-highlights-mode' is on:
 
@@ -42,7 +44,7 @@ Currently, operations listed below will be highlighted While the minor mode
 
     - =yank= and =yank-pop= ::
       Volatile highlights will be put on the text inserted by =yank='
-      or `yank-pop'.
+      or =yank-pop=.
 
     - =kill-region=,  =kill-line=,  any other killing function ::
       Volatile highlights will be put at the positions where the
@@ -54,11 +56,11 @@ Currently, operations listed below will be highlighted While the minor mode
 
     - =find-tag= ::
       Volatile highlights will be put on the tag name which was found
-      by `find-tag'.
+      by =find-tag=.
 
     - =occur-mode-goto-occurrence= and =occur-mode-display-occurrence= ::
       Volatile highlights will be put on the occurrence which is selected
-      by `occur-mode-goto-occurrence' or `occur-mode-display-occurrence'.
+      by =occur-mode-goto-occurrence= or =occur-mode-display-occurrence=.
 
     - Non incremental search operations ::
       Volatile highlights will be put on the the text found by
@@ -69,10 +71,10 @@ Currently, operations listed below will be highlighted While the minor mode
         : nonincremental-re-search-forward
         : nonincremental-re-search-backward
         : nonincremental-repeat-search-forward
-        : nonincremental-repeat-search-backwar
+        : nonincremental-repeat-search-backward
 
 Highlighting support for each operations can be turned on/off individually
-via customization. Also check out the customization group
+via customization. Also check out the customization group by:
 
 : M-x customize-group RET volatile-highlights RET
 
