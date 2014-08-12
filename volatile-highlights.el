@@ -1,6 +1,6 @@
 ;;; volatile-highlights.el --- Minor mode for visual feedback on some operations.
 
-;; Copyright (C) 2001, 2010-2012 K-talo Miyazaki, all rights reserved.
+;; Copyright (C) 2001, 2010-2014 K-talo Miyazaki, all rights reserved.
 
 ;; Author: K-talo Miyazaki <Keitaro dot Miyazaki at gmail dot com>
 ;; Created: 03 October 2001. (as utility functions in my `.emacs' file.)
@@ -31,7 +31,7 @@
 ;;
 ;; Overview
 ;; ========
-;; This library provides minor mode `volatile-highlight-mode', which
+;; This library provides minor mode `volatile-highlights-mode', which
 ;; brings visual feedback to some operations by highlighting portions
 ;; relating to the operations.
 ;;
@@ -51,7 +51,7 @@
 ;;
 ;; USING
 ;; =====
-;; To toggle volatile highlighting, type `M-x volatile-highlights-mode RET'.
+;; To toggle volatile highlighting, type `M-x volatile-highlights-mode <RET>'.
 ;;
 ;; Currently, operations listed below will be highlighted While the minor mode
 ;; `volatile-highlights-mode' is on:
@@ -98,7 +98,7 @@
 
 ;;; Change Log:
 
-;; v1.10
+;; v1.10  Thu Mar 21 22:37:27 2013 JST
 ;;   - Use inherit in face definition when detected.
 ;;   - Suppress compiler warnings regarding to emacs/xemacs private
 ;;     functions by file local variable.
