@@ -216,6 +216,7 @@
 ;;;  Minor Mode Definition.
 ;;;
 ;;;============================================================================
+;;;###autoload
 (easy-mmode-define-minor-mode
  volatile-highlights-mode "Minor mode for visual feedback on some operations."
  :global t
