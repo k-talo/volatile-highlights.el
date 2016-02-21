@@ -100,6 +100,9 @@
 
 ;;; Change Log:
 
+;; v1.12  Sun Feb 21 19:09:29 2016 JST
+;;   - Added autoload cookie.
+;;
 ;; v1.11  Sun Oct  5 13:05:38 2014 JST
 ;;   - Fixed an error "Symbol's function definition is void: return",
 ;;     that occurs when highlight being created with `hideshow' commands.
