@@ -1,13 +1,13 @@
 #+STARTUP: indent
 #+OPTIONS: num:nil toc:nil author:nil timestamp:nil
 
-# Copyright (C) 2001, 2010-2014 K-talo Miyazaki, all rights reserved.
+# Copyright (C) 2001, 2010-2016 K-talo Miyazaki, all rights reserved.
 
 * volatile-highlights.el --- Minor mode for visual feedback on some operations.
 
 ** OVERVIEW
 
-This library provides minor mode `volatile-highlights-mode', which
+This library provides minor mode =volatile-highlights-mode=, which
 brings visual feedback to some operations by highlighting portions
 relating to the operations.
 
@@ -77,4 +77,58 @@ Highlighting support for each operations can be turned on/off individually
 via customization. Also check out the customization group by:
 
 : M-x customize-group RET volatile-highlights RET
+
+
+** EXAMPLE SNIPPETS FOR USING VOLATILE HIGHLIGHTS WITH OTHER PACKAGES
+
+*** vip
+
+#+BEGIN_SRC emacs-lisp
+;;-----------------------------------------------------------------------------
+;; Supporting vip-mode.
+;;-----------------------------------------------------------------------------
+(defun vhl/ext/vip/load ()
+  (vhl/define-extension 'vip 'vip-yank)
+  (vhl/install-extension 'vip))
+
+(cond
+ ((featurep 'vip)
+  (vhl/ext/vip/load))
+ (t
+  (eval-after-load "vip" '(vhl/ext/vip/load))))
+#+END_SRC
+
+*** evil
+
+#+BEGIN_SRC emacs-lisp
+;;-----------------------------------------------------------------------------
+;; Supporting evil-mode.
+;;-----------------------------------------------------------------------------
+(defun vhl/ext/evil/load ()
+  (vhl/define-extension 'evil 'evil-yank 'evil-move)
+  (vhl/install-extension 'evil))
+
+(cond
+ ((featurep 'evil)
+  (vhl/ext/evil/load))
+ (t
+  (eval-after-load "evil" '(vhl/ext/evil/load))))
+#+END_SRC
+
+*** undo-tree
+
+#+BEGIN_SRC emacs-lisp
+;;-----------------------------------------------------------------------------
+;; Supporting undo-tree.
+;;-----------------------------------------------------------------------------
+(defun vhl/ext/undo-tree/load ()
+  (vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
+  (vhl/install-extension 'undo-tree))
+
+(cond
+ ((featurep 'undo-tree)
+  (vhl/ext/undo-tree/load))
+ (t
+  (eval-after-load "undo-tree" '(vhl/ext/undo-tree/load))))
+#+END_SRC
 
