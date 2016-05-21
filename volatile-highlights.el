@@ -1,6 +1,6 @@
 ;;; volatile-highlights.el --- Minor mode for visual feedback on some operations.
 
-;; Copyright (C) 2001, 2010-2014 K-talo Miyazaki, all rights reserved.
+;; Copyright (C) 2001, 2010-2016 K-talo Miyazaki, all rights reserved.
 
 ;; Author: K-talo Miyazaki <Keitaro dot Miyazaki at gmail dot com>
 ;; Created: 03 October 2001. (as utility functions in my `.emacs' file.)
@@ -9,7 +9,7 @@
 ;; Revision: $Id$
 ;; URL: http://www.emacswiki.org/emacs/download/volatile-highlights.el
 ;; GitHub: http://github.com/k-talo/volatile-highlights.el
-;; Version: 1.12
+;; Version: 1.13
 ;; Contributed by: Ryan Thompson and Le Wang.
 
 ;; This file is not part of GNU Emacs.
@@ -100,6 +100,10 @@
 
 ;;; Change Log:
 
+;; v1.13 Sat May 21 11:02:36 2016 JST
+;;   - Fixed a bug that highlighting was not working with nested volatile
+;;     highlighting aware operations like `yak-pop'.
+;;
 ;; v1.12  Sun Feb 21 19:09:29 2016 JST
 ;;   - Added autoload cookie.
 ;;
@@ -415,6 +419,30 @@ Optional args are the same as `vhl/add-range'."
 ;;;  Utility functions/macros for extensions.
 ;;;
 ;;;============================================================================
+(defvar vhl/.after-change-hook-depth 0)
+
+(defun vhl/.push-to-after-change-hook (fn-name)
+  ;; Debug
+  ;; (if (zerop vhl/.after-change-hook-depth)
+  ;;     (message "vlh: push: %s" fn-name)
+  ;;   (message "vlh: skip push: %s" fn-name))
+  (when (zerop vhl/.after-change-hook-depth)
+    (add-hook 'after-change-functions
+              'vhl/.make-vhl-on-change))
+  (setq vhl/.after-change-hook-depth
+        (1+ vhl/.after-change-hook-depth)))
+
+(defun vhl/.pop-from-after-change-hook (fn-name)
+  (setq vhl/.after-change-hook-depth
+        (1- vhl/.after-change-hook-depth))
+  ;; Debug
+  ;; (if (zerop vhl/.after-change-hook-depth)
+  ;;     (message "vlh: pop: %s" fn-name)
+  ;;   (message "vlh: skip pop: %s" fn-name))
+  (when (zerop vhl/.after-change-hook-depth)
+    (remove-hook 'after-change-functions
+                 'vhl/.make-vhl-on-change)))
+
 (defun vhl/advice-defined-p (fn-name class ad-name)
   (and (ad-is-advised fn-name)
        (assq ad-name
@@ -442,12 +470,10 @@ Optional args are the same as `vhl/add-range'."
        (defadvice ,fn-name (around
                               ,ad-name
                               (&rest args))
-         (add-hook 'after-change-functions
-                   'vhl/.make-vhl-on-change)
+         (vhl/.push-to-after-change-hook (quote ,fn-name))
          (unwind-protect
              ad-do-it
-           (remove-hook 'after-change-functions
-                        'vhl/.make-vhl-on-change)))
+           (vhl/.pop-from-after-change-hook (quote ,fn-name))))
        ;; Enable advice.
        (ad-enable-advice (quote ,fn-name) 'around (quote ,ad-name))
        (ad-activate (quote ,fn-name)))))
