@@ -387,8 +387,8 @@ Optional args are the same as `vhl/add-range'."
                     (set-default sym-to-set val)
                     (if val
                         (when volatile-highlights-mode
-                          (vhl/load-extension sym-to-set))
-                      (vhl/unload-extension sym-to-set)))))))
+                          (vhl/load-extension (quote ,sym)))
+                      (vhl/unload-extension (quote ,sym))))))))
 
 (defun vhl/load-extension (sym)
   (let ((fn-on  (intern (format "vhl/ext/%s/on" sym)))
