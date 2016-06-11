@@ -105,7 +105,8 @@ via customization. Also check out the customization group by:
 ;; Supporting evil-mode.
 ;;-----------------------------------------------------------------------------
 (defun vhl/ext/evil/load ()
-  (vhl/define-extension 'evil 'evil-yank 'evil-move)
+  (vhl/define-extension 'evil 'evil-paste-after 'evil-paste-before
+                        'evil-paste-pop 'evil-move)
   (vhl/install-extension 'evil))
 
 (cond

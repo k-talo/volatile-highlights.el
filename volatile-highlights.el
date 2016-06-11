@@ -49,6 +49,7 @@
 ;;    (require 'volatile-highlights)
 ;;    (volatile-highlights-mode t)
 ;;
+;;
 ;; USING
 ;; =====
 ;; To toggle volatile highlighting, type `M-x volatile-highlights-mode <RET>'.
@@ -96,6 +97,47 @@
 ;; via customization. Also check out the customization group
 ;;
 ;;   `M-x customize-group RET volatile-highlights RET'
+;;
+;;
+;; EXAMPLE SNIPPETS FOR USING VOLATILE HIGHLIGHTS WITH OTHER PACKAGES
+;; ==================================================================
+;;
+;; - vip-mode
+;;
+;;   (defun vhl/ext/vip/load ()
+;;     (vhl/define-extension 'vip 'vip-yank)
+;;     (vhl/install-extension 'vip))
+;;   
+;;   (cond
+;;    ((featurep 'vip)
+;;     (vhl/ext/vip/load))
+;;    (t
+;;     (eval-after-load "vip" '(vhl/ext/vip/load))))
+;;
+;; - evil-mode
+;;
+;;   (defun vhl/ext/evil/load ()
+;;     (vhl/define-extension 'evil 'evil-paste-after 'evil-paste-before
+;;                           'evil-paste-pop 'evil-move)
+;;     (vhl/install-extension 'evil))
+;;   
+;;   (cond
+;;    ((featurep 'evil)
+;;     (vhl/ext/evil/load))
+;;    (t
+;;     (eval-after-load "evil" '(vhl/ext/evil/load))))
+;;
+;; - undo-tree
+;;
+;;   (defun vhl/ext/undo-tree/load ()
+;;     (vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
+;;     (vhl/install-extension 'undo-tree))
+;;   
+;;   (cond
+;;    ((featurep 'undo-tree)
+;;     (vhl/ext/undo-tree/load))
+;;    (t
+;;     (eval-after-load "undo-tree" '(vhl/ext/undo-tree/load))))
 
 
 ;;; Change Log:
