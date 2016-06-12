@@ -87,15 +87,8 @@ via customization. Also check out the customization group by:
 ;;-----------------------------------------------------------------------------
 ;; Supporting vip-mode.
 ;;-----------------------------------------------------------------------------
-(defun vhl/ext/vip/load ()
-  (vhl/define-extension 'vip 'vip-yank)
-  (vhl/install-extension 'vip))
-
-(cond
- ((featurep 'vip)
-  (vhl/ext/vip/load))
- (t
-  (eval-after-load "vip" '(vhl/ext/vip/load))))
+(vhl/define-extension 'vip 'vip-yank)
+(vhl/install-extension 'vip)
 #+END_SRC
 
 *** evil
@@ -104,16 +97,9 @@ via customization. Also check out the customization group by:
 ;;-----------------------------------------------------------------------------
 ;; Supporting evil-mode.
 ;;-----------------------------------------------------------------------------
-(defun vhl/ext/evil/load ()
-  (vhl/define-extension 'evil 'evil-paste-after 'evil-paste-before
-                        'evil-paste-pop 'evil-move)
-  (vhl/install-extension 'evil))
-
-(cond
- ((featurep 'evil)
-  (vhl/ext/evil/load))
- (t
-  (eval-after-load "evil" '(vhl/ext/evil/load))))
+(vhl/define-extension 'evil 'evil-paste-after 'evil-paste-before
+                      'evil-paste-pop 'evil-move)
+(vhl/install-extension 'evil)
 #+END_SRC
 
 *** undo-tree
@@ -122,14 +108,7 @@ via customization. Also check out the customization group by:
 ;;-----------------------------------------------------------------------------
 ;; Supporting undo-tree.
 ;;-----------------------------------------------------------------------------
-(defun vhl/ext/undo-tree/load ()
-  (vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
-  (vhl/install-extension 'undo-tree))
-
-(cond
- ((featurep 'undo-tree)
-  (vhl/ext/undo-tree/load))
- (t
-  (eval-after-load "undo-tree" '(vhl/ext/undo-tree/load))))
+(vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
+(vhl/install-extension 'undo-tree)
 #+END_SRC
 

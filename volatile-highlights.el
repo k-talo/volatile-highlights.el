@@ -9,7 +9,7 @@
 ;; Revision: $Id$
 ;; URL: http://www.emacswiki.org/emacs/download/volatile-highlights.el
 ;; GitHub: http://github.com/k-talo/volatile-highlights.el
-;; Version: 1.13
+;; Version: 1.15
 ;; Contributed by: Ryan Thompson and Le Wang.
 
 ;; This file is not part of GNU Emacs.
@@ -104,43 +104,26 @@
 ;;
 ;; - vip-mode
 ;;
-;;   (defun vhl/ext/vip/load ()
-;;     (vhl/define-extension 'vip 'vip-yank)
-;;     (vhl/install-extension 'vip))
+;;   (vhl/define-extension 'vip 'vip-yank)
+;;   (vhl/install-extension 'vip)
 ;;   
-;;   (cond
-;;    ((featurep 'vip)
-;;     (vhl/ext/vip/load))
-;;    (t
-;;     (eval-after-load "vip" '(vhl/ext/vip/load))))
-;;
 ;; - evil-mode
 ;;
-;;   (defun vhl/ext/evil/load ()
-;;     (vhl/define-extension 'evil 'evil-paste-after 'evil-paste-before
-;;                           'evil-paste-pop 'evil-move)
-;;     (vhl/install-extension 'evil))
-;;   
-;;   (cond
-;;    ((featurep 'evil)
-;;     (vhl/ext/evil/load))
-;;    (t
-;;     (eval-after-load "evil" '(vhl/ext/evil/load))))
+;;   (vhl/define-extension 'evil 'evil-paste-after 'evil-paste-before
+;;                         'evil-paste-pop 'evil-move)
+;;   (vhl/install-extension 'evil)
 ;;
 ;; - undo-tree
 ;;
-;;   (defun vhl/ext/undo-tree/load ()
-;;     (vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
-;;     (vhl/install-extension 'undo-tree))
-;;   
-;;   (cond
-;;    ((featurep 'undo-tree)
-;;     (vhl/ext/undo-tree/load))
-;;    (t
-;;     (eval-after-load "undo-tree" '(vhl/ext/undo-tree/load))))
+;;   (vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
+;;   (vhl/install-extension 'undo-tree)
 
 
 ;;; Change Log:
+;;
+;; v1.15 Sun Jun 12 10:40:31 2016 JST
+;;   - Update documents, example snippets for other packages,
+;;     regarding #14.
 ;;
 ;; v1.14 Sun Jun 12 10:12:30 2016 JST
 ;;   - Update documents, especially supporting `evil-mode',
