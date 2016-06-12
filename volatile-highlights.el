@@ -141,7 +141,13 @@
 
 
 ;;; Change Log:
-
+;;
+;; v1.14 Sun Jun 12 10:12:30 2016 JST
+;;   - Update documents, especially supporting `evil-mode',
+;;     regarding #13.
+;;   - Fixed a bug #14, an extension won't be loaded properly
+;;     when it was installed by `vhl/install-extension'.
+;;
 ;; v1.13 Sat May 21 11:02:36 2016 JST
 ;;   - Fixed a bug that highlighting was not working with nested volatile
 ;;     highlighting aware operations like `yak-pop'.
