@@ -226,7 +226,7 @@
   "Visual feedback on operations."
   :group 'editing)
 
-
+(defvar volatile-highlights-delay 0.3 "0.3 seconds")
 ;; Borrowed from `slime.el'.
 (defun vhl/.face-inheritance-possible-p ()
   "Return true if the :inherit face attribute is supported."
@@ -360,6 +360,8 @@ Optional args are the same as `vhl/add-range'."
 	  (overlay-put hl 'face face)
 	  (overlay-put hl 'priority 1)
 	  (overlay-put hl 'volatile-highlights t)))
+    (sit-for volatile-highlights-delay)
+    (vhl/.clear-hl hl)
 	 hl))
 
 ;;-----------------------------------------------------------------------------
@@ -659,7 +661,7 @@ extensions."
   (vhl/disable-advice-if-defined
    'find-tag 'after 'vhl/ext/etags/make-vhl-after-find-tag))
 
-(vhl/install-extension 'etags)
+(eval-after-load 'etags '(vhl/install-extension 'etags))
 
 
 ;;-----------------------------------------------------------------------------
