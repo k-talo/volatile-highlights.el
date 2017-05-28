@@ -106,7 +106,7 @@
 ;;
 ;;   (vhl/define-extension 'vip 'vip-yank)
 ;;   (vhl/install-extension 'vip)
-;;   
+;;
 ;; - evil-mode
 ;;
 ;;   (vhl/define-extension 'evil 'evil-paste-after 'evil-paste-before
@@ -826,16 +826,16 @@ extensions."
   (defadvice hs-show-block (around vhl/ext/hideshow/vhl/around-hook (&optional end))
     (let* ((bol (save-excursion (progn (beginning-of-line) (point))))
            (eol (save-excursion (progn (end-of-line) (point))))
-           (ov-folded (car (delq nil 
+           (ov-folded (car (delq nil
                                  (mapcar #'(lambda (ov)
                                              (and (overlay-get ov 'hs)
                                                   ov))
                                          (overlays-in bol (1+ eol))))))
            (boov (and ov-folded (overlay-start ov-folded)))
            (eoov (and ov-folded (overlay-end ov-folded))))
-    
+
       ad-do-it
-    
+
       (when (and boov eoov)
         (vhl/add-range boov eoov))))
   (ad-activate 'hs-show-block))
@@ -843,7 +843,7 @@ extensions."
 (defun vhl/ext/hideshow/on ()
   "Turn on volatile highlighting for `hideshow'."
   (interactive)
-  
+
   (cond
    ((featurep 'hideshow)
     (vhl/ext/hideshow/.activate))

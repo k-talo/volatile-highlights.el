@@ -111,4 +111,3 @@ via customization. Also check out the customization group by:
 (vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
 (vhl/install-extension 'undo-tree)
 #+END_SRC
-
