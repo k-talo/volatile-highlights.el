@@ -54,7 +54,7 @@
 ;; =====
 ;; To toggle volatile highlighting, type `M-x volatile-highlights-mode <RET>'.
 ;;
-;; While this minor mode is on, a string `VHL' will be displayed on the modeline.
+;; While this minor mode is on, a string `VHl' will be displayed on the modeline.
 ;;
 ;; Currently, operations listed below will be highlighted While the minor mode
 ;; `volatile-highlights-mode' is on:
