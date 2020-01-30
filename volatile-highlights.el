@@ -195,7 +195,7 @@
 (defconst vhl/version "1.8")
 
 (eval-when-compile
-  (require 'cl)
+  (require 'cl-lib)
   (require 'easy-mmode)
   (require 'advice))
 
