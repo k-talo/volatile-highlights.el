@@ -1,4 +1,4 @@
-;;; volatile-highlights.el --- Minor mode for visual feedback on some operations.
+;;; volatile-highlights.el --- Minor mode for visual feedback on some operations. -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2001, 2010-2016 K-talo Miyazaki, all rights reserved.
 
@@ -671,7 +671,7 @@ extensions."
   "Turn on volatile highlighting for `occur'."
   (interactive)
 
-  (lexical-let ((*occur-str* nil)) ;; Text in current line.
+  (let ((*occur-str* nil)) ;; Text in current line.
     (defun vhl/ext/occur/.pre-hook-fn ()
       (save-excursion
         (let* ((bol (progn (beginning-of-line) (point)))
