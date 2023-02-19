@@ -33,7 +33,7 @@
 
 : M-x volatile-highlights-mode <RET>
 
-本マイナーモードがオンである間、モードラインには `VHL' と表示される。
+本マイナーモードがオンである間、モードラインには `VHl' と表示される。
 
 
 現在のところ、以下にリストされた操作について強調表示が行われる:
@@ -106,4 +106,3 @@
 (vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
 (vhl/install-extension 'undo-tree)
 #+END_SRC
-

@@ -34,7 +34,7 @@ To toggle volatile highlighting, type:
 
 : M-x volatile-highlights-mode <RET>
 
-While this minor mode is on, a string `VHL' will be displayed on the modeline.
+While this minor mode is on, a string `VHl' will be displayed on the modeline.
 
 Currently, operations listed below will be highlighted While the minor mode
 `volatile-highlights-mode' is on:
@@ -111,4 +111,3 @@ via customization. Also check out the customization group by:
 (vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
 (vhl/install-extension 'undo-tree)
 #+END_SRC
-
