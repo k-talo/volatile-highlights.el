@@ -549,11 +549,11 @@ extensions."
          ;; Three items
          (cl-assert (stringp (cl-first items)))
          (cl-assert (stringp (cl-second items)))
-         (cl-assert (stringp (third items)))
+         (cl-assert (stringp (cl-third items)))
          (apply 'format "%s, %s, and %s" items))
         (t
          ;; 4 or more items
-         (format "%s, %s" (cl-first items) (vhl/.make-list-string (rest items)))))))
+         (format "%s, %s" (cl-first items) (vhl/.make-list-string (cl-rest items)))))))
 
 ;; The following makes it trivial to define simple vhl extensions
 (defmacro vhl/define-extension (name &rest functions)
