@@ -1,4 +1,4 @@
-;;; volatile-highlights.el --- Minor mode for visual feedback on some operations.
+;;; volatile-highlights.el --- Minor mode for visual feedback on some operations. -*- lexical-binding:t -*-
 
 ;; Copyright (C) 2001, 2010-2016, 2024 K-talo Miyazaki, all rights reserved.
 
@@ -385,7 +385,7 @@ Optional args are the same as `vhl/add-range'."
   (cond
    ;; XEmacs (not tested!)
    (vhl/.xemacsp
-      (map-extents (lambda (hl maparg)
+      (map-extents (lambda (hl _maparg)
                      (and (extent-property hl 'volatile-highlights)
 						  (vhl/.clear-hl hl)))))
    ;; GNU Emacs
@@ -406,8 +406,8 @@ Optional args are the same as `vhl/add-range'."
 (defvar vhl/.installed-extensions nil)
 
 (defun vhl/install-extension (sym)
-  (let ((fn-on  (intern (format "vhl/ext/%s/on" sym)))
-        (fn-off (intern (format "vhl/ext/%s/off" sym)))
+  (let ((_fn-on  (intern (format "vhl/ext/%s/on" sym)))
+        (_fn-off (intern (format "vhl/ext/%s/off" sym)))
         (cust-name (intern (format "vhl/use-%s-extension-p" sym))))
     (pushnew sym vhl/.installed-extensions)
     (eval `(defcustom ,cust-name t
@@ -452,24 +452,24 @@ Optional args are the same as `vhl/add-range'."
 ;;;============================================================================
 (defvar vhl/.after-change-hook-depth 0)
 
-(defun vhl/.push-to-after-change-hook (fn-name)
+(defun vhl/.push-to-after-change-hook (_fn-name)
   ;; Debug
   ;; (if (zerop vhl/.after-change-hook-depth)
-  ;;     (message "vlh: push: %s" fn-name)
-  ;;   (message "vlh: skip push: %s" fn-name))
+  ;;     (message "vlh: push: %s" _fn-name)
+  ;;   (message "vlh: skip push: %s" _fn-name))
   (when (zerop vhl/.after-change-hook-depth)
     (add-hook 'after-change-functions
               'vhl/.make-vhl-on-change))
   (setq vhl/.after-change-hook-depth
         (1+ vhl/.after-change-hook-depth)))
 
-(defun vhl/.pop-from-after-change-hook (fn-name)
+(defun vhl/.pop-from-after-change-hook (_fn-name)
   (setq vhl/.after-change-hook-depth
         (1- vhl/.after-change-hook-depth))
   ;; Debug
   ;; (if (zerop vhl/.after-change-hook-depth)
-  ;;     (message "vlh: pop: %s" fn-name)
-  ;;   (message "vlh: skip pop: %s" fn-name))
+  ;;     (message "vlh: pop: %s" _fn-name)
+  ;;   (message "vlh: skip pop: %s" _fn-name))
   (when (zerop vhl/.after-change-hook-depth)
     (remove-hook 'after-change-functions
                  'vhl/.make-vhl-on-change)))
@@ -514,8 +514,8 @@ Optional args are the same as `vhl/add-range'."
                                  (format "%s" fn-name)))))
     `(vhl/disable-advice-if-defined (quote ,fn-name) 'around (quote ,ad-name))))
 
-(defun vhl/require-noerror (feature &optional filename)
-  (condition-case c
+(defun vhl/require-noerror (feature &optional _filename)
+  (condition-case _c
       (require feature)
     (file-error nil)))
 
@@ -667,85 +667,85 @@ extensions."
 ;;   -- Put volatile highlights on occurrence which is selected by
 ;;      `occur-mode-goto-occurrence' or `occur-mode-display-occurrence'.
 ;;-----------------------------------------------------------------------------
+(defvar vhl/ext/occur/*occur-str* "") ;; Text in current line.
+
+(defun vhl/ext/occur/.pre-hook-fn ()
+  (save-excursion
+    (let* ((bol (progn (beginning-of-line) (point)))
+           (eol (progn (end-of-line) (point)))
+           (bos (text-property-any bol eol 'occur-match t)))
+      (setq vhl/ext/occur/*occur-str* (and bos eol
+                                           (buffer-substring bos eol))))))
+
+(defun vhl/ext/occur/.post-hook-fn ()
+  (let ((marker (and vhl/ext/occur/*occur-str*
+                     (get-text-property 0 'occur-target vhl/ext/occur/*occur-str*)))
+        (len (length vhl/ext/occur/*occur-str*))
+        (ptr 0)
+        (be-lst nil))
+    (when marker
+      ;; Detect position of each occurrence by scanning face
+      ;; `list-matching-lines-face' put on them.
+      (while (and ptr
+                  (setq ptr (text-property-any ptr len
+                                               'face
+                                               list-matching-lines-face
+                                               vhl/ext/occur/*occur-str*)))
+        (let ((beg ptr)
+              (end (or (setq ptr
+                             (next-single-property-change
+                              ptr 'face vhl/ext/occur/*occur-str*))
+                       ;; Occurrence ends at eol.
+                       len)))
+          (push (list beg end)
+                be-lst)))
+      ;; Put volatile highlights on occurrences.
+      (with-current-buffer (marker-buffer marker)
+        (let* ((bol (marker-position marker)))
+          (dolist (be be-lst)
+            (let ((pt-beg (+ bol (nth 0 be)))
+                  (pt-end (+ bol (nth 1 be))))
+              ;; When the occurrence is in folded line,
+              ;; put highlight over whole line which
+              ;; contains folded part.
+              (dolist (ov (overlays-at pt-beg))
+                (when (overlay-get ov 'invisible)
+                  ;;(message "INVISIBLE: %s" ov)
+                  (save-excursion
+                    (goto-char (overlay-start ov))
+                    (beginning-of-line)
+                    (setq pt-beg (min pt-beg (point)))
+                    (goto-char (overlay-end ov))
+                    (end-of-line)
+                    (setq pt-end (max pt-end (point))))))
+
+              (vhl/add-range pt-beg
+                             pt-end
+                             nil
+                             list-matching-lines-face))))))))
+
 (defun vhl/ext/occur/on ()
   "Turn on volatile highlighting for `occur'."
   (interactive)
 
-  (lexical-let ((*occur-str* nil)) ;; Text in current line.
-    (defun vhl/ext/occur/.pre-hook-fn ()
-      (save-excursion
-        (let* ((bol (progn (beginning-of-line) (point)))
-               (eol (progn (end-of-line) (point)))
-               (bos (text-property-any bol eol 'occur-match t)))
-          (setq *occur-str* (and bos eol
-                                 (buffer-substring bos eol))))))
+  (defadvice occur-mode-goto-occurrence (before vhl/ext/occur/pre-hook (&optional event))
+    (vhl/ext/occur/.pre-hook-fn))
+  (defadvice occur-mode-goto-occurrence (after vhl/ext/occur/post-hook (&optional event))
+    (vhl/ext/occur/.post-hook-fn))
 
-    (defun vhl/ext/occur/.post-hook-fn ()
-      (let ((marker (and *occur-str*
-                         (get-text-property 0 'occur-target *occur-str*)))
-            (len (length *occur-str*))
-            (ptr 0)
-            (be-lst nil))
-        (when marker
-          ;; Detect position of each occurrence by scanning face
-          ;; `list-matching-lines-face' put on them.
-          (while (and ptr
-                      (setq ptr (text-property-any ptr len
-                                                   'face
-                                                   list-matching-lines-face
-                                                   *occur-str*)))
-            (let ((beg ptr)
-                  (end (or (setq ptr
-                                 (next-single-property-change
-                                  ptr 'face *occur-str*))
-                           ;; Occurrence ends at eol.
-                           len)))
-              (push (list beg end)
-                    be-lst)))
-          ;; Put volatile highlights on occurrences.
-          (with-current-buffer (marker-buffer marker)
-            (let* ((bol (marker-position marker)))
-              (dolist (be be-lst)
-                (let ((pt-beg (+ bol (nth 0 be)))
-                      (pt-end (+ bol (nth 1 be))))
-                  ;; When the occurrence is in folded line,
-                  ;; put highlight over whole line which
-                  ;; contains folded part.
-                  (dolist (ov (overlays-at pt-beg))
-                    (when (overlay-get ov 'invisible)
-                      ;;(message "INVISIBLE: %s" ov)
-                      (save-excursion
-                        (goto-char (overlay-start ov))
-                        (beginning-of-line)
-                        (setq pt-beg (min pt-beg (point)))
-                        (goto-char (overlay-end ov))
-                        (end-of-line)
-                        (setq pt-end (max pt-end (point))))))
+  (defadvice occur-mode-display-occurrence (before vhl/ext/occur/pre-hook ())
+    (vhl/ext/occur/.pre-hook-fn))
+  (defadvice occur-mode-display-occurrence (after vhl/ext/occur/post-hook ())
+    (vhl/ext/occur/.post-hook-fn))
 
-                  (vhl/add-range pt-beg
-                                 pt-end
-                                 nil
-                                 list-matching-lines-face))))))))
+  (defadvice occur-mode-goto-occurrence-other-window (before vhl/ext/occur/pre-hook ())
+    (vhl/ext/occur/.pre-hook-fn))
+  (defadvice occur-mode-goto-occurrence-other-window (after vhl/ext/occur/post-hook ())
+    (vhl/ext/occur/.post-hook-fn))
 
-
-    (defadvice occur-mode-goto-occurrence (before vhl/ext/occur/pre-hook (&optional event))
-      (vhl/ext/occur/.pre-hook-fn))
-    (defadvice occur-mode-goto-occurrence (after vhl/ext/occur/post-hook (&optional event))
-      (vhl/ext/occur/.post-hook-fn))
-
-    (defadvice occur-mode-display-occurrence (before vhl/ext/occur/pre-hook ())
-      (vhl/ext/occur/.pre-hook-fn))
-    (defadvice occur-mode-display-occurrence (after vhl/ext/occur/post-hook ())
-      (vhl/ext/occur/.post-hook-fn))
-
-    (defadvice occur-mode-goto-occurrence-other-window (before vhl/ext/occur/pre-hook ())
-      (vhl/ext/occur/.pre-hook-fn))
-    (defadvice occur-mode-goto-occurrence-other-window (after vhl/ext/occur/post-hook ())
-      (vhl/ext/occur/.post-hook-fn))
-
-    (ad-activate 'occur-mode-goto-occurrence)
-    (ad-activate 'occur-mode-display-occurrence)
-    (ad-activate 'occur-mode-goto-occurrence-other-window)))
+  (ad-activate 'occur-mode-goto-occurrence)
+  (ad-activate 'occur-mode-display-occurrence)
+  (ad-activate 'occur-mode-goto-occurrence-other-window))
 
 (defun vhl/ext/occur/off ()
   "Turn off volatile highlighting for `occur'."
