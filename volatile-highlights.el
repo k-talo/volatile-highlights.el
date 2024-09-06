@@ -1,6 +1,6 @@
 ;;; volatile-highlights.el --- Minor mode for visual feedback on some operations.
 
-;; Copyright (C) 2001, 2010-2016 K-talo Miyazaki, all rights reserved.
+;; Copyright (C) 2001, 2010-2016, 2024 K-talo Miyazaki, all rights reserved.
 
 ;; Author: K-talo Miyazaki <Keitaro dot Miyazaki at gmail dot com>
 ;; Created: 03 October 2001. (as utility functions in my `.emacs' file.)
