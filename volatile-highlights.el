@@ -121,6 +121,17 @@
 
 ;;; Change Log:
 ;;
+;; v1.16 Sat Sep 14 06:57:51 2024 JST
+;;   - This release is a maintenance release to support new versions of Emacs.
+;;     There are no notable new features, but the following fixes have been made.
+;;   - Translate `defadvice' to `advice-add'.
+;;   - Fixed a bug, `vhl/ext/occur' does not make highlights properly.
+;;   - 'occur' command on Emacs >= 28 has volatile highlights feature, so
+;;     'vhl/ext/occur' is not required. (fix #26)
+;;   - Adapt to lexical binding.
+;;   - Add year 2024 to copyright line.
+;;   - Use `cl-lib'. (fix #21 and #23)
+;;
 ;; v1.15 Sun Jun 12 10:40:31 2016 JST
 ;;   - Update documents, example snippets for other packages,
 ;;     regarding #14.
@@ -192,7 +203,7 @@
 
 ;;; Code:
 
-(defconst vhl/version "1.8")
+(defconst vhl/version "1.16")
 
 (eval-when-compile
   (require 'cl-lib)

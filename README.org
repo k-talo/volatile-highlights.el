@@ -1,7 +1,7 @@
 #+STARTUP: indent
 #+OPTIONS: num:nil toc:nil author:nil timestamp:nil
 
-# Copyright (C) 2001, 2010-2016 K-talo Miyazaki, all rights reserved.
+# Copyright (C) 2001, 2010-2016, 2024 K-talo Miyazaki, all rights reserved.
 
 * volatile-highlights.el --- Minor mode for visual feedback on some operations.
 
