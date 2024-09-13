@@ -728,45 +728,52 @@ extensions."
   "Turn on volatile highlighting for `occur'."
   (interactive)
 
-  (defadvice occur-mode-goto-occurrence (before vhl/ext/occur/pre-hook (&optional event))
-    (vhl/ext/occur/.pre-hook-fn))
-  (defadvice occur-mode-goto-occurrence (after vhl/ext/occur/post-hook (&optional event))
-    (vhl/ext/occur/.post-hook-fn))
+  (if (< emacs-major-version 28)
+      (progn
+        (defadvice occur-mode-goto-occurrence (before vhl/ext/occur/pre-hook (&optional event))
+          (vhl/ext/occur/.pre-hook-fn))
+        (defadvice occur-mode-goto-occurrence (after vhl/ext/occur/post-hook (&optional event))
+          (vhl/ext/occur/.post-hook-fn))
 
-  (defadvice occur-mode-display-occurrence (before vhl/ext/occur/pre-hook ())
-    (vhl/ext/occur/.pre-hook-fn))
-  (defadvice occur-mode-display-occurrence (after vhl/ext/occur/post-hook ())
-    (vhl/ext/occur/.post-hook-fn))
+        (defadvice occur-mode-display-occurrence (before vhl/ext/occur/pre-hook ())
+          (vhl/ext/occur/.pre-hook-fn))
+        (defadvice occur-mode-display-occurrence (after vhl/ext/occur/post-hook ())
+          (vhl/ext/occur/.post-hook-fn))
 
-  (defadvice occur-mode-goto-occurrence-other-window (before vhl/ext/occur/pre-hook ())
-    (vhl/ext/occur/.pre-hook-fn))
-  (defadvice occur-mode-goto-occurrence-other-window (after vhl/ext/occur/post-hook ())
-    (vhl/ext/occur/.post-hook-fn))
+        (defadvice occur-mode-goto-occurrence-other-window (before vhl/ext/occur/pre-hook ())
+          (vhl/ext/occur/.pre-hook-fn))
+        (defadvice occur-mode-goto-occurrence-other-window (after vhl/ext/occur/post-hook ())
+          (vhl/ext/occur/.post-hook-fn))
 
-  (ad-activate 'occur-mode-goto-occurrence)
-  (ad-activate 'occur-mode-display-occurrence)
-  (ad-activate 'occur-mode-goto-occurrence-other-window))
+        (ad-activate 'occur-mode-goto-occurrence)
+        (ad-activate 'occur-mode-display-occurrence)
+        (ad-activate 'occur-mode-goto-occurrence-other-window))
+    (message "`occur' command on Emacs >= 28 has volatile highlight feature, so `vhl/ext/occur' is not required.")))
 
 (defun vhl/ext/occur/off ()
   "Turn off volatile highlighting for `occur'."
   (interactive)
 
-  (vhl/disable-advice-if-defined
-   'occur-mode-goto-occurrence 'before 'vhl/ext/occur/pre-hook)
-  (vhl/disable-advice-if-defined
-   'occur-mode-goto-occurrence 'after 'vhl/ext/occur/post-hook)
+  (when (< emacs-major-version 28)
+    (vhl/disable-advice-if-defined
+     'occur-mode-goto-occurrence 'before 'vhl/ext/occur/pre-hook)
+    (vhl/disable-advice-if-defined
+     'occur-mode-goto-occurrence 'after 'vhl/ext/occur/post-hook)
 
-  (vhl/disable-advice-if-defined
-   'occur-mode-display-occurrence 'before 'vhl/ext/occur/pre-hook)
-  (vhl/disable-advice-if-defined
-   'occur-mode-display-occurrence 'after 'vhl/ext/occur/post-hook)
+    (vhl/disable-advice-if-defined
+     'occur-mode-display-occurrence 'before 'vhl/ext/occur/pre-hook)
+    (vhl/disable-advice-if-defined
+     'occur-mode-display-occurrence 'after 'vhl/ext/occur/post-hook)
 
-  (vhl/disable-advice-if-defined
-   'occur-mode-goto-occurrence-other-window 'before 'vhl/ext/occur/pre-hook)
-  (vhl/disable-advice-if-defined
-   'occur-mode-goto-occurrence-other-window 'after 'vhl/ext/occur/post-hook))
+    (vhl/disable-advice-if-defined
+     'occur-mode-goto-occurrence-other-window 'before 'vhl/ext/occur/pre-hook)
+    (vhl/disable-advice-if-defined
+     'occur-mode-goto-occurrence-other-window 'after 'vhl/ext/occur/post-hook)))
 
-(vhl/install-extension 'occur)
+;; `occur' command on Emacs >= 28 has volatile highlight feature,
+;; so `vhl/ext/occur' is not required.
+(when (< emacs-major-version 28)
+  (vhl/install-extension 'occur))
 
 
 ;;-----------------------------------------------------------------------------
