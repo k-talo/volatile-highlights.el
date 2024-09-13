@@ -672,39 +672,78 @@ extensions."
 (defun vhl/ext/occur/.pre-hook-fn ()
   (save-excursion
     (let* ((bol (progn (beginning-of-line) (point)))
-           (eol (progn (end-of-line) (point)))
-           (bos (text-property-any bol eol 'occur-match t)))
-      (setq vhl/ext/occur/*occur-str* (and bos eol
-                                           (buffer-substring bos eol))))))
+           (eol (progn (end-of-line) (point))))
+      (setq vhl/ext/occur/*occur-str* (and bol eol
+                                           ;; Skip line number.
+                                           (replace-regexp-in-string
+                                            "^[ \t]*[0-9]+:" ""
+                                            (buffer-substring bol eol)))))))
+
+(defun vhl/ext/occur/.find-face-ranges-in-str (str face)
+  "Find ranges where the specified FACE is applied in STR.
+Returns a list of (beg . end), or nil if not found."
+  (let ((ptr 0)
+        (len (length str))
+        be-lst be)
+    (while (/= ptr len)
+      (setq be (vhl/ext/occur/.find-face-ranges-in-str-aux str face ptr))
+      (if (= (car be) len)
+          (setq ptr len)
+        (setq be-lst (cons be be-lst))
+        (setq ptr (cdr be))))
+    (reverse be-lst)))
+
+(defun vhl/ext/occur/.str-has-face-at-pos-p (str face pos)
+  (let ((found-face (get-text-property pos 'face str)))
+    (cond
+     ((listp found-face)
+      (member face found-face))
+     ((atom found-face)
+      (eq face found-face))
+     (t nil))))
+
+(defun vhl/ext/occur/.find-face-ranges-in-str-aux (str face pos)
+  (let ((ptr pos)
+        (len (length str))
+        beg end)
+    
+    ;; Find beggining of face range
+    (when (vhl/ext/occur/.str-has-face-at-pos-p str face ptr)
+      (setq beg ptr))
+    
+    (while (not beg)
+      (setq ptr (next-single-property-change ptr 'face str len))
+      (if (vhl/ext/occur/.str-has-face-at-pos-p str face ptr)
+          (setq beg ptr)
+        (when (= ptr len) (setq beg ptr))))
+    
+    ;; Find end of face range
+    (while (not end)
+      (setq ptr (next-single-property-change ptr 'face str len))
+      (if (not (vhl/ext/occur/.str-has-face-at-pos-p str face ptr))
+          (setq end ptr)
+        (when (= ptr len) (setq end ptr))))
+    (cons beg end)))
 
 (defun vhl/ext/occur/.post-hook-fn ()
   (let ((marker (and vhl/ext/occur/*occur-str*
                      (get-text-property 0 'occur-target vhl/ext/occur/*occur-str*)))
-        (len (length vhl/ext/occur/*occur-str*))
-        (ptr 0)
         (be-lst nil))
     (when marker
       ;; Detect position of each occurrence by scanning face
       ;; `list-matching-lines-face' put on them.
-      (while (and ptr
-                  (setq ptr (text-property-any ptr len
-                                               'face
-                                               list-matching-lines-face
-                                               vhl/ext/occur/*occur-str*)))
-        (let ((beg ptr)
-              (end (or (setq ptr
-                             (next-single-property-change
-                              ptr 'face vhl/ext/occur/*occur-str*))
-                       ;; Occurrence ends at eol.
-                       len)))
-          (push (list beg end)
-                be-lst)))
+      (setq be-lst
+            (vhl/ext/occur/.find-face-ranges-in-str vhl/ext/occur/*occur-str*
+                                                    list-matching-lines-face))
       ;; Put volatile highlights on occurrences.
       (with-current-buffer (marker-buffer marker)
-        (let* ((bol (marker-position marker)))
+        (let* ((bol (save-excursion
+                      (goto-char (marker-position marker))
+                      (beginning-of-line)
+                      (point))))
           (dolist (be be-lst)
-            (let ((pt-beg (+ bol (nth 0 be)))
-                  (pt-end (+ bol (nth 1 be))))
+            (let ((pt-beg (+ bol (car be)))
+                  (pt-end (+ bol (cdr be))))
               ;; When the occurrence is in folded line,
               ;; put highlight over whole line which
               ;; contains folded part.
