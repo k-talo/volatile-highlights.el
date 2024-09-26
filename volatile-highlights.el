@@ -284,6 +284,11 @@ where the deleted text used to be would be highlighted."
   :type 'boolean
   :group 'volatile-highlights)
 
+(defcustom Vhl/highlight-reversed nil
+  "If t, highlight the area sorrounding the region."
+  :type 'boolean
+  :group 'volatile-highlights)
+
 
 ;;;============================================================================
 ;;;
@@ -294,22 +299,30 @@ where the deleted text used to be would be highlighted."
 ;;-----------------------------------------------------------------------------
 ;; (vhl/add-range BEG END &OPTIONAL BUF FACE) => VOID
 ;;-----------------------------------------------------------------------------
-(defun vhl/add-range (beg end &optional buf face)
+(defun vhl/add-range (beg end &optional buf face reverse)
   "Add a volatile highlight to the buffer `BUF' at the position
 specified by `BEG' and `END' using the face `FACE'.
 
 When the buffer `BUF' is not specified or its value is `nil',
 volatile highlight will be added to current buffer.
 
-When the face `FACE' is not specified or its value is `nil',
-the default face `vhl/default-face' will
-be used as the value."
+When the face `FACE' is not specified or its value is `nil', the
+default face `vhl/default-face' will be used as the value.
+
+If `REVERSE' is `t', the highlight is placed on the sorrounding
+region instead. `Vhl/highlight-reversed' inverts the highlight
+globally."
   (let* ((face (or face 'vhl/default-face))
-		 (hl (vhl/.make-hl beg end buf face)))
-	(setq vhl/.hl-lst
-		  (cons hl vhl/.hl-lst))
-	(add-hook 'pre-command-hook 'vhl/clear-all)))
-(define-obsolete-function-alias 'vhl/add 'vhl/add-range "1.5")
+	 (rev (if Vhl/highlight-reversed (not reverse) reverse)))
+    (setq vhl/.hl-lst
+	  (if rev
+	      (append
+	       (list (vhl/.make-hl (point-min) beg buf face)
+		     (vhl/.make-hl end (point-max) buf face))
+	       vhl/.hl-lst)
+	      (cons (vhl/.make-hl beg end buf face) vhl/.hl-lst)))
+    (add-hook 'pre-command-hook 'vhl/clear-all)))
+(define-obsolete-function-alias 'vhl/add 'vhl/add-rang "1.5")
 
 ;;-----------------------------------------------------------------------------
 ;; (vhl/add-position POS &OPTIONAL BUF FACE) => VOID
