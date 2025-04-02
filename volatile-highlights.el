@@ -650,7 +650,6 @@ extensions."
   (defun vhl/ext/etags/on ()
   "Turn on volatile highlighting for `etags'."
   (interactive)
-  (require 'etags)
   (advice-add 'find-tag :after #'vhl/ext/etags/.after-find-tag))
 
 (defun vhl/ext/etags/off ()
