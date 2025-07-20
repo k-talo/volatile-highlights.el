@@ -170,6 +170,8 @@
 
 ;;; Change Log:
 ;;
+;;   - Supress a compiler warning "‘easy-mmode-define-minor-mode’ is an
+;;     obsolete alias (as of 30.1)".
 ;;   - New user option `vhl/use-pulsing-visual-effect-p'.
 ;;     When this option has non-nil value, volatile highlights will be cleared
 ;;     with pulsing visual effect (fix #16).
@@ -332,8 +334,13 @@
 ;;;  Minor Mode Definition.
 ;;;
 ;;;============================================================================
+(eval-and-compile
+  ;; ‘easy-mmode-define-minor-mode’ is obsoleted alias (as of 30.1)
+  (if (<= 30 emacs-major-version)
+      (defalias 'vhl/define-minor-mode 'define-minor-mode)
+    (defalias 'vhl/define-minor-mode 'easy-mmode-define-minor-mode)))
 ;;;###autoload
-(easy-mmode-define-minor-mode
+(vhl/define-minor-mode
  volatile-highlights-mode "Minor mode for visual feedback on some operations."
  :global t
  :init-value nil
