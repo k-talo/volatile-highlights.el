@@ -58,13 +58,31 @@ Highlighting support for each operations can be turned on/off individually via c
 
 The following user options are provided to help you get the look you want:
 
--   **`vhl/use-pulsing-visual-effect-p`:** Whether to use visual effect 'pulsing' for volatile highlighting. Pulsing involves a bright highlight that slowly shifts to the background color.
+First, you can change the color for volatile highlighting by editing the face:
+
+-   **`vhl/default-face`:** Face used for volatile highlights.
+
+    When you edit the face, make sure the background color does not overlap with the default background color, otherwise the highlights will not be visible.
+
+Next, choose whether you want to highlight the zero width ranges as well:
+
+-   **`Vhl/highlight-zero-width-ranges`:** If `t`, highlight the positions of zero-width ranges.
     
-    If the value is `nil`, highlight with an unchanging color until next command occurs.
-    
-    If `vhl/use-pulsing-visual-effect-p` is non-nil, but the return value of the function `vhl/pulse/available-p` is nil, then this flag is ignored.
+    For example, if a deletion is highlighted, then the position where the deleted text used to be would be highlighted.
     
     Default value is `nil`.
+
+And then, choose whether you want to use visual effect 'pulsing' or not:
+
+-   **`vhl/use-pulsing-visual-effect-p`:** Whether to use visual effect 'pulsing' for volatile highlighting. Pulsing involves a bright highlight that slowly shifts to the background color.
+    
+    When the value is `nil`, Volatile highlighting will remain visible until next command occurs.
+
+    If `vhl/use-pulsing-visual-effect-p` is non-nil, but the return value of the function `vhl/pulse/available-p` is nil, then this user option is ignored.
+    
+    Default value is `nil`.
+
+You can also fine-tune the pulsing animation with the user options below.
 
 -   **`vhl/pulse-iterations`:** Number of iterations of a pulse animation for volatile highlights.
     
@@ -78,17 +96,6 @@ The following user options are provided to help you get the look you want:
     
     Default value is `0.03`.
 
--   **`Vhl/highlight-zero-width-ranges`:** If `t`, highlight the positions of zero-width ranges.
-    
-    For example, if a deletion is highlighted, then the position where the deleted text used to be would be highlighted.
-    
-    Default value is `nil`.
-
-And you can change the color for volatile highlighting by editing the face:
-
--   **`vhl/default-face`:** Face used for volatile highlights.
-
-When you edit the face, make sure the background color does not overlap with the default background color, otherwise the highlights will not be visible.
 
 
 ## Example snippets for using volatile highlights with other packages
