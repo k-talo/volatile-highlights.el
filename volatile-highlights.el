@@ -6,10 +6,9 @@
 ;; Created: 03 October 2001. (as utility functions in my `.emacs' file.)
 ;;          14 March   2010. (re-written as library `volatile-highlights.el')
 ;; Keywords: emulations convenience wp
-;; Revision: $Id$
 ;; URL: http://www.emacswiki.org/emacs/download/volatile-highlights.el
 ;; GitHub: http://github.com/k-talo/volatile-highlights.el
-;; Version: 1.15
+;; Version: 1.17
 ;; Contributed by: Ryan Thompson and Le Wang.
 
 ;; This file is not part of GNU Emacs.
@@ -170,6 +169,7 @@
 
 ;;; Change Log:
 ;;
+;; v1.17 Sun Jul 20 16:43:18 2025 JST
 ;;   - Supress a compiler warning "‘easy-mmode-define-minor-mode’ is an
 ;;     obsolete alias (as of 30.1)".
 ;;   - New user option `vhl/use-pulsing-visual-effect-p'.
