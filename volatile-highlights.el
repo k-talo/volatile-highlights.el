@@ -121,6 +121,11 @@
 
 ;;; Change Log:
 ;;
+;;   - Do not require etags
+;;     This is not necessary for the advice mechanism to work, and causes
+;;     unnecessary loading of etags and its dependencies at startup if
+;;     volatile-highlights-mode is enabled.
+;;
 ;; v1.16 Sat Sep 14 06:57:51 2024 JST
 ;;   - This release is a maintenance release to support new versions of Emacs.
 ;;     There are no notable new features, but the following fixes have been made.
