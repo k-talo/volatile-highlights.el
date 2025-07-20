@@ -78,6 +78,54 @@ via customization. Also check out the customization group by:
 
 : M-x customize-group RET volatile-highlights RET
 
+** ADJUSTING THE LOOKS TO SUIT YOUR TASTE
+
+The following user options are provided to help you get the look you want:
+
+    - =vhl/use-pulsing-visual-effect-p= ::
+      Whether to use visual effect 'pulsing' for volatile highlighting.
+      Pulsing involves a bright highlight that slowly shifts to the
+      background color.
+
+      If the value is =nil=, highlight with an unchanging color until
+      next command occurs.
+
+      If =vhl/use-pulsing-visual-effect-p= is non-nil, but the return value of
+      the function =vhl/pulse/available-p= is nil, then this flag is ignored.
+
+      Default value is =nil=.
+
+    - =vhl/pulse-iterations= ::
+      Number of iterations of a pulse animation for volatile highlights.
+
+      Default value is =8=.
+
+    - =vhl/pulse-start-delay= ::
+      Delay before pulse animation begins in seconds.
+
+      Default value is =0.15=.
+
+    - =vhl/pulse-iteration-delay= ::
+      Delay between iterations of the pulse animation in seconds.
+
+      Default value is =0.02=.
+
+    - =Vhl/highlight-zero-width-ranges= ::
+      If =t=, highlight the positions of zero-width ranges.
+
+      For example, if a deletion is highlighted, then the position
+      where the deleted text used to be would be highlighted.
+
+      Default value is =nil=.
+
+ And you can change the color for volatile highlighting by editing the face:
+
+    - =vhl/default-face= ::
+      Face used for volatile highlights.
+
+ When you edit the face, make sure the background color does not overlap with
+ the default background color, otherwise the highlights will not be visible.
+
 
 ** EXAMPLE SNIPPETS FOR USING VOLATILE HIGHLIGHTS WITH OTHER PACKAGES
 

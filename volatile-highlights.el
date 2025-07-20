@@ -99,6 +99,55 @@
 ;;   `M-x customize-group RET volatile-highlights RET'
 ;;
 ;;
+;; ADJUSTING THE LOOKS TO SUIT YOUR TASTE
+;; ======================================
+;; The following user options are provided to help you get the look you want:
+;;
+;;    - `vhl/use-pulsing-visual-effect-p'
+;;      Whether to use visual effect 'pulsing' for volatile highlighting.
+;;      Pulsing involves a bright highlight that slowly shifts to the
+;;      background color.
+;;
+;;      If the value is nil, highlight with an unchanging color until
+;;      next command occurs.
+;;
+;;      If `vhl/use-pulsing-visual-effect-p' is non-nil, but the return value of
+;;      the function `vhl/pulse/available-p' is nil, then this flag is ignored.
+;;
+;;      Default value is `nil'.
+;;
+;;    - `vhl/pulse-iterations'
+;;      Number of iterations of a pulse animation for volatile highlights.
+;;
+;;      Default value is `8'.
+;;
+;;    - `vhl/pulse-start-delay'
+;;      Delay before pulse animation begins in seconds.
+;;
+;;      Default value is `0.15'.
+;;
+;;    - `vhl/pulse-iteration-delay'
+;;      Delay between iterations of the pulse animation in seconds.
+;;
+;;      Default value is `0.02'.
+;;
+;;    - `Vhl/highlight-zero-width-ranges'
+;;      If `t', highlight the positions of zero-width ranges.
+;;
+;;      For example, if a deletion is highlighted, then the position
+;;      where the deleted text used to be would be highlighted.
+;;
+;;      Default value is `nil'.
+;;
+;; And you can change the color for volatile highlighting by editing the face:
+;;
+;;    - `vhl/default-face'
+;;      Face used for volatile highlights.
+;;
+;; When you edit the face, make sure the background color does not overlap with
+;; the default background color, otherwise the highlights will not be visible.
+;;
+;;
 ;; EXAMPLE SNIPPETS FOR USING VOLATILE HIGHLIGHTS WITH OTHER PACKAGES
 ;; ==================================================================
 ;;
@@ -121,6 +170,12 @@
 
 ;;; Change Log:
 ;;
+;;   - New user option `vhl/use-pulsing-visual-effect-p'.
+;;     When this option has non-nil value, volatile highlights will be cleared
+;;     with pulsing visual effect (fix #16).
+;;     Note that the default value is `nil'.
+;;     This feature is inspired by the library `pulse.el', which was written
+;;     by Eric M. Ludlam.
 ;;   - Do not require etags
 ;;     This is not necessary for the advice mechanism to work, and causes
 ;;     unnecessary loading of etags and its dependencies at startup if
@@ -214,6 +269,7 @@
   (require 'cl-lib)
   (require 'easy-mmode)
   (require 'advice))
+(require 'color)
 
 (provide 'volatile-highlights)
 
@@ -230,6 +286,12 @@
 
 (defvar vhl/.hl-lst nil
   "List of volatile highlights.")
+
+(defvar vhl/pulse/.faces-to-pulse-lst nil
+  "List of faces which will be pulsed on next idle time.")
+
+(defvar vhl/pulse/.timer-cb nil
+  "Callback function to generate pulse animation with timer.")
 
 
 ;;;============================================================================
@@ -280,6 +342,36 @@
      (vhl/load-extensions)
    (vhl/unload-extensions)))
 
+(defcustom vhl/use-pulsing-visual-effect-p nil
+  ;; This part is taken from `pulse-flag' in
+  ;; `pulse.el' by Eric M. Ludlam.
+  "Whether to use visual effect `pulsing' for volatile highlighting.
+Pulsing involves a bright highlight that slowly shifts to the
+background color.
+
+If the value is nil, highlight with an unchanging color until
+next command occurs.
+
+If `vhl/use-pulsing-visual-effect-p' is non-nil, but the return value of the
+ function `vhl/pulse/available-p' is nil, then this flag is ignored."
+  :group 'pulse
+  :type '(choice (const :tag "Highlight with unchanging color" nil)
+                 (other :tag "Pulse" t)))
+
+(defcustom vhl/pulse-iterations 8
+  "Number of iterations of a pulse animation for volatile highlights."
+  :type 'number
+  :group 'volatile-highlights)
+
+(defcustom vhl/pulse-start-delay 0.15
+  "Delay before pulse animation begins in seconds."
+  :type 'number
+  :group 'volatile-highlights)
+
+(defcustom vhl/pulse-iteration-delay 0.02
+  "Delay between iterations of the pulse animation in seconds."
+  :type 'number
+  :group 'volatile-highlights)
 
 (defcustom Vhl/highlight-zero-width-ranges nil
   "If t, highlight the positions of zero-width ranges.
@@ -313,6 +405,20 @@ be used as the value."
 		 (hl (vhl/.make-hl beg end buf face)))
 	(setq vhl/.hl-lst
 		  (cons hl vhl/.hl-lst))
+
+    ;; Prepare for pulsing this range if needed.
+    (when (and vhl/use-pulsing-visual-effect-p (vhl/pulse/available-p))
+      ;; Just to be safe, clean up any additional information
+      ;; added to the face.
+      (vhl/pulse/reset-face face)
+      ;; Remember which face will be pulsed on next idle time.
+      (add-to-list 'vhl/pulse/.faces-to-pulse-lst face nil #'eq)
+      ;; Make pulse animation on next idle time.
+      (unless vhl/pulse/.timer-cb
+        (setq vhl/pulse/.timer-cb
+              (run-with-idle-timer
+               vhl/pulse-start-delay nil #'vhl/pulse/.do-it))))
+
 	(add-hook 'pre-command-hook 'vhl/clear-all)))
 (define-obsolete-function-alias 'vhl/add 'vhl/add-range "1.5")
 
@@ -340,6 +446,7 @@ Optional args are the same as `vhl/add-range'."
 	(vhl/.clear-hl (car vhl/.hl-lst))
 	(setq vhl/.hl-lst
 		  (cdr vhl/.hl-lst)))
+  (vhl/pulse/reset)
 	  (remove-hook 'pre-command-hook 'vhl/clear-all))
 
 ;;-----------------------------------------------------------------------------
@@ -412,6 +519,125 @@ Optional args are the same as `vhl/add-range'."
 				(and (overlay-get hl 'volatile-highlights)
 					 (vhl/.clear-hl hl)))
 			  (overlays-in (point-min) (point-max)))))))
+
+
+;;;============================================================================
+;;;
+;;;  Public Functions/Commands for pulsing.
+;;;
+;;;============================================================================
+
+;;-----------------------------------------------------------------------------
+;; (vhl/pulse/available-p) => BOOL
+;;-----------------------------------------------------------------------------
+(defun vhl/pulse/available-p ()
+  ;; This part is taken from `pulse-available-p' in
+  ;; `pulse.el' by Eric M. Ludlam.
+  "Return non-nil if pulsing is available on the current frame."
+  (condition-case nil
+      (let ((v (color-values (face-background 'default))))
+        (numberp (car-safe v)))
+    (error nil)))
+
+;;-----------------------------------------------------------------------------
+;; (vhl/pulse/reset FACE) => VOID
+;;-----------------------------------------------------------------------------
+(defun vhl/pulse/reset ()
+  "Reset information for pulsing volatile highlights."
+  (interactive)
+  (dolist (face vhl/pulse/.faces-to-pulse-lst)
+    (vhl/pulse/reset-face face))
+  (setq vhl/pulse/.faces-to-pulse-lst nil)
+  (when vhl/pulse/.timer-cb
+    (cancel-timer vhl/pulse/.timer-cb))
+  (setq vhl/pulse/.timer-cb nil))
+
+;;-----------------------------------------------------------------------------
+;; (vhl/pulse/reset-face FACE) => VOID
+;;-----------------------------------------------------------------------------
+(defun vhl/pulse/reset-face (face)
+  "Restore background color of FACE and forget information for pulsing
+volatile highlights."
+  (interactive (list (read-face-name "Reset face for pulse"
+                                     (or (face-at-point t) 'default)
+                                     t)))
+  (let ((orig-bg-color (and (facep face)
+                            (get face 'vhl/pulse/orig-bg-color))))
+    (when orig-bg-color
+      (set-face-background face orig-bg-color)
+      (put face 'vhl/pulse/orig-bg-color nil)
+      (put face 'vhl/pulse/gradient-bg-color-lst nil))))
+
+
+;;;============================================================================
+;;;
+;;;  Private Functions/Commands for pulsing.
+;;;
+;;;============================================================================
+
+;;-----------------------------------------------------------------------------
+;; (vhl/pulse/.make-color-gradient FACE) => LIST OF COLORS
+;;-----------------------------------------------------------------------------
+(defun vhl/pulse/.make-color-gradient (face)
+  ;; Make a list of gradient colors for pulse animation.
+
+  ;; This part is taken from `pulse-momentary-highlight-overlay' in
+  ;; `pulse.el' by Eric M. Ludlam.
+  (let ((start (color-name-to-rgb
+                (face-background face nil 'default)))
+        (stop (color-name-to-rgb (face-background 'default))))
+    (put face 'vhl/pulse/start-bg-color (face-background face nil 'default))
+    (mapcar (apply-partially 'apply 'color-rgb-to-hex)
+            (color-gradient start stop vhl/pulse-iterations))))
+
+;;-----------------------------------------------------------------------------
+;; (vhl/pulse/.prepare-for-face FACE) => VOID
+;;-----------------------------------------------------------------------------
+(defun vhl/pulse/.prepare-for-face (face)
+  ;; Save the original background color of FACE for restoration,
+  ;; then get gradient colors for pulse animation.
+  (when (and (facep face)
+             ;; do nothing the face is already set up.
+             (null (get face 'vhl/pulse/orig-bg-color)))
+    (put face 'vhl/pulse/orig-bg-color (face-background face nil 'default))
+    (put face 'vhl/pulse/gradient-bg-color-lst
+         (vhl/pulse/.make-color-gradient face))))
+
+;;-----------------------------------------------------------------------------
+;; (vhl/pulse/.do-it FACE) => VOID
+;;-----------------------------------------------------------------------------
+(defun vhl/pulse/.do-it ()
+  ;; Make volatile highlights pulsing by changing background color of
+  ;; each faces step by step.
+  (let (has-pending-gradient-colors-p)
+    (dolist (face vhl/pulse/.faces-to-pulse-lst)
+      (vhl/pulse/.prepare-for-face face)
+
+      (let ((gradient-colors (get face 'vhl/pulse/gradient-bg-color-lst)))
+        (when gradient-colors
+          (progn
+            ;; Change background color of a face for the pulse animation.
+            (set-face-background face (car gradient-colors))
+
+            ;; Prepare gradient colors for next step.
+            (setq gradient-colors (cdr gradient-colors))
+            (put face 'vhl/pulse/gradient-bg-color-lst gradient-colors)
+            (setq has-pending-gradient-colors-p
+                  (or has-pending-gradient-colors-p gradient-colors))))))
+    ;; Make delay.
+    (sleep-for vhl/pulse-iteration-delay)
+
+    (cond
+     ((and has-pending-gradient-colors-p
+           (not (input-pending-p)))
+      ;; Step forward the pulse animation.
+      (when vhl/pulse/.timer-cb
+        (cancel-timer vhl/pulse/.timer-cb))
+      (setq vhl/pulse/.timer-cb
+            (run-with-timer 0 nil #'vhl/pulse/.do-it)))
+     (t
+      ;; When finished the pulse animation, clean up all highlights.
+      (vhl/clear-all)))))
 
 
 ;;;============================================================================
