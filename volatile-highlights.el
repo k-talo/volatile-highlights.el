@@ -169,6 +169,7 @@
 
 ;;; Change Log:
 ;;
+;; v1.18 Tue Jul 22 16:20:00 2025 JST
 ;;   - Fix: Correct group for vhl/use-pulsing-visual-effect-p
 ;;     The variable `vhl/use-pulsing-visual-effect-p` was incorrectly assigned
 ;;     to the `pulse` group. This commit moves it to the more appropriate
