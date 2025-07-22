@@ -169,6 +169,10 @@
 
 ;;; Change Log:
 ;;
+;;   - Fix: Correct group for vhl/use-pulsing-visual-effect-p
+;;     The variable `vhl/use-pulsing-visual-effect-p` was incorrectly assigned
+;;     to the `pulse` group. This commit moves it to the more appropriate
+;;     `volatile-highlights-mode` group.
 ;; v1.17 Sun Jul 20 16:43:18 2025 JST
 ;;   - Supress a compiler warning "‘easy-mmode-define-minor-mode’ is an
 ;;     obsolete alias (as of 30.1)".
@@ -361,7 +365,7 @@ next command occurs.
 
 If `vhl/use-pulsing-visual-effect-p' is non-nil, but the return value of the
  function `vhl/pulse/available-p' is nil, then this flag is ignored."
-  :group 'pulse
+  :group 'volatile-highlights-mode
   :type '(choice (const :tag "Highlight with unchanging color" nil)
                  (other :tag "Pulse" t)))
 
