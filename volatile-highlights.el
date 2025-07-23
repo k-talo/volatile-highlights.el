@@ -339,12 +339,17 @@
 ;;;  Minor Mode Definition.
 ;;;
 ;;;============================================================================
+;;;###autoload
+(defun volatile-highlights-mode (&optional _arg1)
+  ;; We define a just dummy function for autoload mechanism of package.el.
+  "Minor mode for visual feedback on some operations.")
+
 (eval-and-compile
   ;; ‘easy-mmode-define-minor-mode’ is obsoleted alias (as of 30.1)
   (if (<= 30 emacs-major-version)
       (defalias 'vhl/define-minor-mode 'define-minor-mode)
     (defalias 'vhl/define-minor-mode 'easy-mmode-define-minor-mode)))
-;;;###autoload
+
 (vhl/define-minor-mode
  volatile-highlights-mode "Minor mode for visual feedback on some operations."
  :global t
@@ -1127,7 +1132,7 @@ Returns a list of (beg . end), or nil if not found."
 ;;;============================================================================
 
 ;; Local variables:
-;; byte-compile-warnings: (not unresolved)
+;; byte-compile-warnings: (not unresolved redefine)
 ;; End:
 
 ;;; volatile-highlights.el ends here
