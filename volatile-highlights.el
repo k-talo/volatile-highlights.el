@@ -277,6 +277,7 @@
   (require 'easy-mmode)
   (require 'advice))
 (require 'color)
+(require 'thingatpt)
 
 (provide 'volatile-highlights)
 
@@ -909,6 +910,44 @@ extensions."
 
 
 ;;-----------------------------------------------------------------------------
+;; Extension for supporting xref jumps.
+;;   -- Add a non-pulsing volatile highlight after xref jumps and returns.
+;;-----------------------------------------------------------------------------
+
+(defun vhl/ext/xref/.highlight-current-symbol-or-line ()
+  "Highlight the current `symbol' or the current line as a fallback."
+  (let* ((bnds (bounds-of-thing-at-point 'symbol))
+         (beg (car-safe bnds))
+         (end (cdr-safe bnds)))
+    (if (and beg end)
+        (vhl/add-range beg end)
+      (vhl/add-range (line-beginning-position) (line-end-position)))))
+
+(defun vhl/ext/xref/.after-jump (&rest _args)
+  "Hook run after xref jumps/returns to place a volatile highlight."
+  (ignore _args)
+  (vhl/ext/xref/.highlight-current-symbol-or-line))
+
+(defun vhl/ext/xref/on ()
+  "Turn on volatile highlighting for `xref' jumps."
+  (interactive)
+  (when (vhl/require-noerror 'xref)
+    (add-hook 'xref-after-jump-hook #'vhl/ext/xref/.after-jump)
+    (when (boundp 'xref-after-return-hook)
+      (add-hook 'xref-after-return-hook #'vhl/ext/xref/.after-jump))))
+
+(defun vhl/ext/xref/off ()
+  "Turn off volatile highlighting for `xref' jumps."
+  (interactive)
+  (when (featurep 'xref)
+    (remove-hook 'xref-after-jump-hook #'vhl/ext/xref/.after-jump)
+    (when (boundp 'xref-after-return-hook)
+      (remove-hook 'xref-after-return-hook #'vhl/ext/xref/.after-jump))))
+
+(vhl/install-extension 'xref)
+
+
+;;-----------------------------------------------------------------------------
 ;; Extension for supporting occur.
 ;;   -- Put volatile highlights on occurrence which is selected by
 ;;      `occur-mode-goto-occurrence' or `occur-mode-display-occurrence'.
@@ -1081,8 +1120,6 @@ Returns a list of (beg . end), or nil if not found."
 
 
 ;;-----------------------------------------------------------------------------
-
-
 ;; Extension for hideshow.
 ;;   -- Put volatile highlights on the text blocks which are shown/hidden
 ;;      by hideshow.

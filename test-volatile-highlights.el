@@ -144,6 +144,41 @@
               (should (= (overlay-end ov) (point-max))))))))
     (vhl/clear-all)))
 
+(ert-deftest vhl/test-xref-after-jump-highlights-symbol ()
+  "xref after-jump hook highlights the symbol at point."
+  (with-temp-buffer
+    (let ((volatile-highlights-mode nil))
+      (volatile-highlights-mode 1)
+      (unwind-protect
+          (progn
+            (insert "foo bar")
+            (goto-char 2) ;; on "o" in "foo"
+            (vhl/ext/xref/.after-jump)
+            (let* ((ovs (vhl/test--vhl-overlays (point-min) (point-max)))
+                   (ov (car ovs)))
+              (should (= (length ovs) 1))
+              (should (string= (buffer-substring-no-properties (overlay-start ov)
+                                                               (overlay-end ov))
+                               "foo"))))
+        (volatile-highlights-mode -1)))))
+
+(ert-deftest vhl/test-xref-after-jump-line-fallback ()
+  "xref after-jump hook falls back to line highlight when no symbol."
+  (with-temp-buffer
+    (let ((volatile-highlights-mode nil))
+      (volatile-highlights-mode 1)
+      (unwind-protect
+          (progn
+            (insert "   \nnext")
+            (goto-char 2) ;; whitespace line
+            (vhl/ext/xref/.after-jump)
+            (let* ((ovs (vhl/test--vhl-overlays (point-min) (point-max)))
+                   (ov (car ovs)))
+              (should (= (length ovs) 1))
+              (should (= (overlay-start ov) (line-beginning-position)))
+              (should (= (overlay-end ov) (line-end-position)))))
+        (volatile-highlights-mode -1)))))
+
 (provide 'test-volatile-highlights)
 
 ;;; test-volatile-highlights.el ends here
