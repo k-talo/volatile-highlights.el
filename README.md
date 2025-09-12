@@ -47,7 +47,7 @@ When `volatile-highlights-mode` is active, the following operations will be high
 -   **`undo`:** Highlights the text affected by the undo operation.
 -   **`yank` and `yank-pop`:** Highlights the newly pasted text.
 -   **Killing commands (`kill-region`, `kill-line`, etc.):** Highlights the region where text was cut.
--   **`find-tag`:** Highlights the located tag.
+-   **Definitions (`xref` on Emacs 25.1+, `find-tag` on older Emacs):** Highlights the destination at point.
 -   **`occur`:** Highlights the selected occurrence when jumping from an `*Occur*` buffer.
 -   **Non-incremental search:** Highlights the found text.
 
@@ -77,22 +77,35 @@ Here are some examples of how you might configure the package in your `init.el`:
   :custom
   ;; Use a pulsing effect instead of a static highlight
   (vhl/use-pulsing-visual-effect-p t)
-  ;; Don't highlight when yanking
-  (vhl/use-yank-extension-p nil)
   :config
   ;; You can also set variables directly
   (setq vhl/pulse-iterations 5))
 ```
 
-## Testing
+### xref (Emacs 25.1+)
 
-Run ERT tests in batch:
+On Emacs 25.1 and newer, use `xref` to navigate to definitions (instead of `find-tag`).
 
-`emacs -Q --batch -L . -l volatile-highlights.el -l test-volatile-highlights.el -f ert-run-tests-batch-and-exit`
+By default, xref shows a pulsing highlight after jumps (controlled by `xref-pulse-on-jump`). If you prefer a static highlight, use the configuration below.
 
-Byte-compile to catch compile-time issues:
+Keep static (non-pulsing) highlights, including for xref jumps:
 
-`emacs -Q --batch -L . -f batch-byte-compile volatile-highlights.el`
+```emacs-lisp
+(use-package volatile-highlights
+  :ensure t
+  :hook (after-init . volatile-highlights-mode)
+  :custom
+  ;; Keep static (non-pulsing) highlights (default)
+  (vhl/use-pulsing-visual-effect-p nil)
+  ;; Ensure xref integration is on (definitions)
+  (vhl/use-xref-extension-p t)
+  :config
+  (with-eval-after-load 'xref
+    ;; Disable the built-in xref pulse to keep static highlights
+    (setq xref-pulse-on-jump nil)))
+```
+
+You can toggle vhl's xref integration with the customization flag `vhl/use-xref-extension-p`.
 
 ## Extending with Other Packages
 
@@ -126,3 +139,13 @@ To integrate with `undo-tree`:
     (vhl/define-extension 'undo-tree 'undo-tree-yank)
     (vhl/install-extension 'undo-tree)))
 ```
+
+## Testing
+
+Run ERT tests in batch:
+
+`emacs -Q --batch -L . -l volatile-highlights.el -l test-volatile-highlights.el -f ert-run-tests-batch-and-exit`
+
+Byte-compile to catch compile-time issues:
+
+`emacs -Q --batch -L . -f batch-byte-compile volatile-highlights.el`
