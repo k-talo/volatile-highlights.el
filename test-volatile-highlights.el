@@ -8,6 +8,7 @@
 ;;; Code:
 
 (require 'ert)
+(require 'cl-lib)
 (require 'volatile-highlights)
 
 (defun vhl/test--count-vhl-overlays (beg end)
@@ -15,12 +16,30 @@
   (cl-count-if (lambda (ov) (overlay-get ov 'volatile-highlights))
                (overlays-in beg end)))
 
+(defun vhl/test--vhl-overlays (beg end)
+  "Return list of overlays with property \='volatile-highlights between BEG and END."
+  (cl-remove-if-not (lambda (ov) (overlay-get ov 'volatile-highlights))
+                    (overlays-in beg end)))
+
+(defmacro vhl/test--silence (&rest body)
+  "Evaluate BODY with messages suppressed."
+  `(let ((inhibit-message t)
+         (message-log-max nil))
+     ,@body))
+
 (ert-deftest vhl/test-add-range-creates-overlay ()
   "vhl/add-range creates a volatile highlight overlay in current buffer."
   (with-temp-buffer
     (insert "abcdef")
     (vhl/add-range 2 5)
-    (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 1))
+    (let* ((ovs (vhl/test--vhl-overlays (point-min) (point-max)))
+           (ov (car ovs)))
+      (should (= (length ovs) 1))
+      (should (= (overlay-start ov) 2))
+      (should (= (overlay-end ov) 5))
+      (should (string= (buffer-substring-no-properties (overlay-start ov)
+                                                       (overlay-end ov))
+                       "bcd")))
     (vhl/clear-all)
     (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0))))
 
@@ -44,10 +63,87 @@
     (vhl/clear-all)
     (let ((Vhl/highlight-zero-width-ranges t))
       (vhl/add-position 2)
-      (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 1)))
+      (let* ((ovs (vhl/test--vhl-overlays (point-min) (point-max)))
+             (ov (car ovs)))
+        (should (= (length ovs) 1))
+        (should (= (overlay-start ov) 2))
+        (should (= (overlay-end ov) 3))
+        (should (string= (buffer-substring-no-properties (overlay-start ov)
+                                                         (overlay-end ov))
+                         "y"))))
+    (vhl/clear-all)))
+
+(ert-deftest vhl/test-yank-creates-and-clears ()
+  "yank creates a highlight and next command clears it."
+  (with-temp-buffer
+    (let ((volatile-highlights-mode nil))
+      (volatile-highlights-mode 1)
+      (unwind-protect
+          (progn
+            (insert "foo ")
+            (setq kill-ring '("BAR"))
+            (goto-char (point-max))
+            (vhl/test--silence (yank))
+            (let* ((ovs (vhl/test--vhl-overlays (point-min) (point-max)))
+                   (ov (car ovs)))
+              (should (= (length ovs) 1))
+              (should (string= (buffer-substring-no-properties (overlay-start ov)
+                                                               (overlay-end ov))
+                               "BAR")))
+            ;; Simulate next command
+            (run-hooks 'pre-command-hook)
+            (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))
+        (volatile-highlights-mode -1)))))
+
+(ert-deftest vhl/test-undo-highlights ()
+  "undo highlights affected text."
+  (with-temp-buffer
+    (let ((volatile-highlights-mode nil))
+      (volatile-highlights-mode 1)
+      (unwind-protect
+          (progn
+            (buffer-enable-undo)
+            (undo-boundary)
+            (insert "abcdef")
+            (undo-boundary)
+            ;; Delete some text, then undo to trigger highlighting
+            (delete-region 3 6)
+            (undo-boundary)
+            (vhl/test--silence (undo))
+            (let* ((ovs (vhl/test--vhl-overlays (point-min) (point-max)))
+                   (ov (car ovs)))
+              (should (= (length ovs) 1))
+              (should (= (overlay-start ov) 3))
+              (should (= (overlay-end ov) 6))
+              (should (string= (buffer-substring-no-properties (overlay-start ov)
+                                                               (overlay-end ov))
+                               "cde"))))
+        (volatile-highlights-mode -1)))))
+
+(ert-deftest vhl/test-add-position-clamps-to-buffer-size ()
+  "vhl/add-position clamps when POS is beyond buffer size."
+  (with-temp-buffer
+    (insert "hi")
+    (let ((Vhl/highlight-zero-width-ranges t))
+      (vhl/add-position 10)
+      (let* ((ovs (vhl/test--vhl-overlays (point-min) (point-max)))
+             (ov (car ovs))
+             (lastc (buffer-substring-no-properties (1- (point-max)) (point-max))))
+        (should (= (length ovs) 1))
+        (should (<= (overlay-start ov) (point-max)))
+        (should (<= (overlay-end ov) (point-max)))
+        (let ((len (- (overlay-end ov) (overlay-start ov))))
+          (should (member len '(0 1)))
+          (when (= len 1)
+            (should (string= (buffer-substring-no-properties (overlay-start ov)
+                                                             (overlay-end ov))
+                             lastc))
+            ;; If zero-length, it should be at point-max (clamped)
+            (when (= len 0)
+              (should (= (overlay-start ov) (point-max)))
+              (should (= (overlay-end ov) (point-max))))))))
     (vhl/clear-all)))
 
 (provide 'test-volatile-highlights)
 
 ;;; test-volatile-highlights.el ends here
-
