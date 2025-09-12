@@ -1,135 +1,118 @@
-# volatile-highlights.el &#x2014; Minor mode for visual feedback on some operations.
-
+# volatile-highlights.el - Minor mode for visual feedback on some operations.
 
 ## Overview
 
-This library provides minor mode `volatile-highlights-mode`, which brings visual feedback to some operations by highlighting portions relating to the operations.
+This library provides the minor mode `volatile-highlights-mode`, which gives visual feedback for some operations by temporarily highlighting the relevant text.
 
-All of highlights made by this library will be removed when any new operation is executed.
+For example, when you `yank` (paste) text, the newly inserted text will be highlighted for a moment. When you `undo`, the undone text will be highlighted. This provides a clear, visual confirmation of what just happened.
 
+All highlights are "volatile" and will disappear on the next user action.
 
-## INSTALLING
+## Installation
 
-To install this library, save the file "volatile-highlights.el" to a directory in your `load-path` (you can view the current `load-path` using `C-h v load-path <RET>` within Emacs), then add following lines to your `.emacs` start up file:
+### From MELPA (Recommended)
+
+`volatile-highlights.el` is available on [MELPA](https://melpa.org/#/volatile-highlights). If you have MELPA configured in your Emacs, you can install it with:
+
+`M-x package-install RET volatile-highlights RET`
+
+### Manual Installation
+
+Alternatively, download `volatile-highlights.el` and place it in a directory on your `load-path`.
+
+## Configuration
+
+You can enable `volatile-highlights-mode` globally with the following in your Emacs configuration (`init.el` or `.emacs`):
 
 ```emacs-lisp
-(require 'volatile-highlights)
-(volatile-highlights-mode t)
+(volatile-highlights-mode 1)
 ```
 
+### Using `use-package`
 
-## Using
-
-To toggle volatile highlighting, type:
-
-    M-x volatile-highlights-mode <RET>
-
-While this minor mode is on, a string \`VHl' will be displayed on the modeline.
-
-Currently, operations listed below will be highlighted While the minor mode \`volatile-highlights-mode' is on:
-
--   **`undo`:** Volatile highlights will be put on the text inserted by `undo`.
-
--   **`yank` and `yank-pop`:** Volatile highlights will be put on the text inserted by `yank`' or `yank-pop`.
-
--   **`kill-region`,  `kill-line`,  any other killing function:** Volatile highlights will be put at the positions where the killed text used to be.
-
--   **`delete-region`:** Same as `kill-region`, but not as reliable since `delete-region` is an inline function.
-
--   **`find-tag`:** Volatile highlights will be put on the tag name which was found by `find-tag`.
-
--   **`occur-mode-goto-occurrence` and `occur-mode-display-occurrence`:** Volatile highlights will be put on the occurrence which is selected by `occur-mode-goto-occurrence` or `occur-mode-display-occurrence`.
-
--   **Non incremental search operations:** Volatile highlights will be put on the the text found by commands listed below:
-    
-        nonincremental-search-forward
-        nonincremental-search-backward
-        nonincremental-re-search-forward
-        nonincremental-re-search-backward
-        nonincremental-repeat-search-forward
-        nonincremental-repeat-search-backward
-
-Highlighting support for each operations can be turned on/off individually via customization. Also check out the customization group by:
-
-    M-x customize-group RET volatile-highlights RET
-
-
-## Adjusting the looks to suit your taste
-
-The following user options are provided to help you get the look you want:
-
-First, you can change the color for volatile highlighting by editing the face:
-
--   **`vhl/default-face`:** Face used for volatile highlights.
-
-    When you edit the face, make sure the background color does not overlap with the default background color, otherwise the highlights will not be visible.
-
-Next, choose whether you want to highlight the zero width ranges as well:
-
--   **`Vhl/highlight-zero-width-ranges`:** If `t`, highlight the positions of zero-width ranges.
-    
-    For example, if a deletion is highlighted, then the position where the deleted text used to be would be highlighted.
-    
-    Default value is `nil`.
-
-And then, choose whether you want to use visual effect 'pulsing' or not:
-
--   **`vhl/use-pulsing-visual-effect-p`:** Whether to use visual effect 'pulsing' for volatile highlighting. Pulsing involves a bright highlight that slowly shifts to the background color.
-    
-    When the value is `nil`, Volatile highlighting will remain visible until next command occurs.
-
-    If `vhl/use-pulsing-visual-effect-p` is non-nil, but the return value of the function `vhl/pulse/available-p` is nil, then this user option is ignored.
-    
-    Default value is `nil`.
-
-You can also fine-tune the pulsing animation with the user options below.
-
--   **`vhl/pulse-iterations`:** Number of iterations of a pulse animation for volatile highlights.
-    
-    Default value is `10`.
-
--   **`vhl/pulse-start-delay`:** Delay before pulse animation begins in seconds.
-    
-    Default value is `0.1`.
-
--   **`vhl/pulse-iteration-delay`:** Delay between iterations of the pulse animation in seconds.
-    
-    Default value is `0.03`.
-
-
-
-## Example snippets for using volatile highlights with other packages
-
-
-### vip
+A more structured way to configure it, especially if you use the popular [`use-package`](https://github.com/jwiegley/use-package) macro, is as follows:
 
 ```emacs-lisp
-;;-----------------------------------------------------------------------------
-;; Supporting vip-mode.
-;;-----------------------------------------------------------------------------
-(vhl/define-extension 'vip 'vip-yank)
-(vhl/install-extension 'vip)
+(use-package volatile-highlights
+  :ensure t
+  :hook (after-init . volatile-highlights-mode))
 ```
 
+This ensures the package is installed and enables the mode when Emacs starts.
 
-### evil
+## Features
+
+When `volatile-highlights-mode` is active, the following operations will be highlighted:
+
+-   **`undo`:** Highlights the text affected by the undo operation.
+-   **`yank` and `yank-pop`:** Highlights the newly pasted text.
+-   **Killing commands (`kill-region`, `kill-line`, etc.):** Highlights the region where text was cut.
+-   **`find-tag`:** Highlights the located tag.
+-   **`occur`:** Highlights the selected occurrence when jumping from an `*Occur*` buffer.
+-   **Non-incremental search:** Highlights the found text.
+
+You can enable or disable highlighting for each specific operation through the customization interface.
+
+## Customization
+
+### Basic Customization
+
+To customize the behavior and appearance of the highlights, you can use the customization group:
+
+`M-x customize-group RET volatile-highlights RET`
+
+This interface allows you to:
+-   Toggle highlighting for specific commands (e.g., turn off for `yank` but keep for `undo`).
+-   Change the highlight color by customizing the `vhl/default-face`.
+-   Enable or disable the "pulsing" effect (`vhl/use-pulsing-visual-effect-p`).
+
+### Example Customizations with `use-package`
+
+Here are some examples of how you might configure the package in your `init.el`:
 
 ```emacs-lisp
-;;-----------------------------------------------------------------------------
-;; Supporting evil-mode.
-;;-----------------------------------------------------------------------------
-(vhl/define-extension 'evil 'evil-paste-after 'evil-paste-before
-                      'evil-paste-pop 'evil-move)
-(vhl/install-extension 'evil)
+(use-package volatile-highlights
+  :ensure t
+  :hook (after-init . volatile-highlights-mode)
+  :custom
+  ;; Use a pulsing effect instead of a static highlight
+  (vhl/use-pulsing-visual-effect-p t)
+  ;; Don't highlight when yanking
+  (vhl/use-yank-extension-p nil)
+  :config
+  ;; You can also set variables directly
+  (setq vhl/pulse-iterations 5))
 ```
 
+## Extending with Other Packages
 
-### undo-tree
+`volatile-highlights` can be configured to work with other packages that have their own yank/paste or navigation commands.
+
+### Evil (Extensible Vi Layer)
+
+To make `evil-mode`'s pasting commands trigger highlights, a robust `use-package` setup would be:
 
 ```emacs-lisp
-;;-----------------------------------------------------------------------------
-;; Supporting undo-tree.
-;;-----------------------------------------------------------------------------
-(vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
-(vhl/install-extension 'undo-tree)
+(use-package volatile-highlights
+  :ensure t
+  :hook (after-init . volatile-highlights-mode)
+  :config
+  (with-eval-after-load 'evil
+    (vhl/define-extension 'evil 'evil-paste-after 'evil-paste-before
+                          'evil-paste-pop)
+    (vhl/install-extension 'evil)))
+```
+
+### Undo-tree
+
+To integrate with `undo-tree`:
+
+```emacs-lisp
+(use-package volatile-highlights
+  :ensure t
+  :hook (after-init . volatile-highlights-mode)
+  :config
+  (with-eval-after-load 'undo-tree
+    (vhl/define-extension 'undo-tree 'undo-tree-yank)
+    (vhl/install-extension 'undo-tree)))
 ```
