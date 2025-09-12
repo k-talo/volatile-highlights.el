@@ -84,6 +84,16 @@ Here are some examples of how you might configure the package in your `init.el`:
   (setq vhl/pulse-iterations 5))
 ```
 
+## Testing
+
+Run ERT tests in batch:
+
+`emacs -Q --batch -L . -l volatile-highlights.el -l test-volatile-highlights.el -f ert-run-tests-batch-and-exit`
+
+Byte-compile to catch compile-time issues:
+
+`emacs -Q --batch -L . -f batch-byte-compile volatile-highlights.el`
+
 ## Extending with Other Packages
 
 `volatile-highlights` can be configured to work with other packages that have their own yank/paste or navigation commands.

@@ -8,7 +8,7 @@
 ;; Keywords: emulations convenience wp
 ;; URL: http://www.emacswiki.org/emacs/download/volatile-highlights.el
 ;; GitHub: http://github.com/k-talo/volatile-highlights.el
-;; Version: 1.17
+;; Version: 1.18
 ;; Contributed by: Ryan Thompson and Le Wang.
 
 ;; This file is not part of GNU Emacs.
@@ -175,7 +175,7 @@
 ;;     to the `pulse` group. This commit moves it to the more appropriate
 ;;     `volatile-highlights-mode` group.
 ;; v1.17 Sun Jul 20 16:43:18 2025 JST
-;;   - Supress a compiler warning "‘easy-mmode-define-minor-mode’ is an
+;;   - Supress a compiler warning "'easy-mmode-define-minor-mode' is an
 ;;     obsolete alias (as of 30.1)".
 ;;   - New user option `vhl/use-pulsing-visual-effect-p'.
 ;;     When this option has non-nil value, volatile highlights will be cleared
@@ -270,7 +270,7 @@
 
 ;;; Code:
 
-(defconst vhl/version "1.16")
+(defconst vhl/version "1.18")
 
 (eval-when-compile
   (require 'cl-lib)
@@ -345,7 +345,7 @@
   "Minor mode for visual feedback on some operations.")
 
 (eval-and-compile
-  ;; ‘easy-mmode-define-minor-mode’ is obsoleted alias (as of 30.1)
+  ;; 'easy-mmode-define-minor-mode' is obsoleted alias (as of 30.1)
   (if (<= 30 emacs-major-version)
       (defalias 'vhl/define-minor-mode 'define-minor-mode)
     (defalias 'vhl/define-minor-mode 'easy-mmode-define-minor-mode)))
@@ -371,7 +371,7 @@ next command occurs.
 
 If `vhl/use-pulsing-visual-effect-p' is non-nil, but the return value of the
  function `vhl/pulse/available-p' is nil, then this flag is ignored."
-  :group 'volatile-highlights-mode
+  :group 'volatile-highlights
   :type '(choice (const :tag "Highlight with unchanging color" nil)
                  (other :tag "Pulse" t)))
 
