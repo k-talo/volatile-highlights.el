@@ -935,7 +935,6 @@ extensions."
 
 (defun vhl/ext/xref/.after-jump (&rest _args)
   "Hook run after xref jumps/returns to place a volatile highlight."
-  (ignore _args)
   (vhl/ext/xref/.highlight-current-symbol-or-line))
 
 (defun vhl/ext/xref/on ()

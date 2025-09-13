@@ -8,6 +8,8 @@ For example, when you `yank` (paste) text, the newly inserted text will be highl
 
 All highlights are "volatile" and will disappear on the next user action.
 
+For integration with other packages and developer-oriented examples, see the Extending Guide: [docs/extending.md](docs/extending.md).
+
 ## Installation
 
 ### From MELPA (Recommended)
@@ -65,7 +67,8 @@ To customize the behavior and appearance of the highlights, you can use the cust
 This interface allows you to:
 -   Toggle highlighting for specific commands (e.g., turn off for `yank` but keep for `undo`).
 -   Change the highlight color by customizing the `vhl/default-face`.
--   Enable or disable the "pulsing" effect (`vhl/use-pulsing-visual-effect-p`).
+-   Enable or disable the "pulsing" effect (`vhl/use-pulsing-visual-effect-p`, default: disabled).
+-   Highlight zero-width ranges (`Vhl/highlight-zero-width-ranges`, default: disabled): also mark deletion points as a 1-character highlight.
 
 ### Example Customizations with `use-package`
 
@@ -78,6 +81,8 @@ Here are some examples of how you might configure the package in your `init.el`:
   :custom
   ;; Use a pulsing effect instead of a static highlight
   (vhl/use-pulsing-visual-effect-p t)
+  ;; Also mark deletion points (zero-width ranges)
+  (Vhl/highlight-zero-width-ranges t)
   :config
   ;; You can also set variables directly
   (setq vhl/pulse-iterations 5))
@@ -110,9 +115,17 @@ Keep static (non-pulsing) highlights, including for xref jumps:
 
 You can toggle vhl's xref integration with the customization flag `vhl/use-xref-extension-p`.
 
+## Visual and Performance
+
+- Face: Customize `vhl/default-face` to match your theme for clear highlights.
+- Large ranges: Static (non-pulsing) highlights are often easier to read than pulsing for big changes.
+- Avoid stacking: Do not layer multiple highlight systems for the same action (e.g., xref pulse + VHL) unless intentional.
+
 ## Extending with Other Packages
 
 `volatile-highlights` can be configured to work with other packages that have their own yank/paste or insertion/deletion commands.
+
+For a broader, task-oriented guide (user and developer examples), see the Extending Guide: [docs/extending.md](docs/extending.md).
 
 ### Evil (Extensible Vi Layer)
 
