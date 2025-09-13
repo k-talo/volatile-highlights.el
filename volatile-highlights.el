@@ -418,26 +418,29 @@ volatile highlight will be added to current buffer.
 
 When the face `FACE' is not specified or its value is `nil',
 the default face `vhl/default-face' will
-be used as the value."
-  (let* ((face (or face 'vhl/default-face))
-		 (hl (vhl/.make-hl beg end buf face)))
-	(setq vhl/.hl-lst
-		  (cons hl vhl/.hl-lst))
+be used as the value.
 
-    ;; Prepare for pulsing this range if needed.
-    (when (and vhl/use-pulsing-visual-effect-p (vhl/pulse/available-p))
-      ;; Just to be safe, clean up any additional information
-      ;; added to the face.
-      (vhl/pulse/reset-face face)
-      ;; Remember which face will be pulsed on next idle time.
-      (add-to-list 'vhl/pulse/.faces-to-pulse-lst face nil #'eq)
-      ;; Make pulse animation on next idle time.
-      (unless vhl/pulse/.timer-cb
-        (setq vhl/pulse/.timer-cb
-              (run-with-idle-timer
-               vhl/pulse-start-delay nil #'vhl/pulse/.do-it))))
+If `volatile-highlights-mode' is disabled, this function does nothing."
+  (when volatile-highlights-mode
+    (let* ((face (or face 'vhl/default-face))
+		   (hl (vhl/.make-hl beg end buf face)))
+	  (setq vhl/.hl-lst
+		    (cons hl vhl/.hl-lst))
 
-	(add-hook 'pre-command-hook 'vhl/clear-all)))
+      ;; Prepare for pulsing this range if needed.
+      (when (and vhl/use-pulsing-visual-effect-p (vhl/pulse/available-p))
+        ;; Just to be safe, clean up any additional information
+        ;; added to the face.
+        (vhl/pulse/reset-face face)
+        ;; Remember which face will be pulsed on next idle time.
+        (add-to-list 'vhl/pulse/.faces-to-pulse-lst face nil #'eq)
+        ;; Make pulse animation on next idle time.
+        (unless vhl/pulse/.timer-cb
+          (setq vhl/pulse/.timer-cb
+                (run-with-idle-timer
+                 vhl/pulse-start-delay nil #'vhl/pulse/.do-it))))
+
+	  (add-hook 'pre-command-hook 'vhl/clear-all))))
 (define-obsolete-function-alias 'vhl/add 'vhl/add-range "1.5")
 
 ;;-----------------------------------------------------------------------------
@@ -448,7 +451,9 @@ be used as the value."
 
 If Vhl/highlight-zero-width-ranges is nil, do nothing.
 
-Optional args are the same as `vhl/add-range'."
+Optional args are the same as `vhl/add-range'.
+
+When `volatile-highlights-mode' is disabled, this function is a no-op."
   (when (and Vhl/highlight-zero-width-ranges (not (zerop (buffer-size))))
     (when (> pos (buffer-size))
         (setq pos (- pos 1)))

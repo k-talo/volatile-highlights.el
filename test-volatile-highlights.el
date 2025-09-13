@@ -31,7 +31,11 @@
   "vhl/add-range creates a volatile highlight overlay in current buffer."
   (with-temp-buffer
     (insert "abcdef")
-    (vhl/add-range 2 5)
+    (let ((volatile-highlights-mode nil))
+      (volatile-highlights-mode 1)
+      (unwind-protect
+          (vhl/add-range 2 5)
+        (volatile-highlights-mode -1)))
     (let* ((ovs (vhl/test--vhl-overlays (point-min) (point-max)))
            (ov (car ovs)))
       (should (= (length ovs) 1))
@@ -47,8 +51,13 @@
   "vhl/clear-all removes all volatile highlight overlays."
   (with-temp-buffer
     (insert "12345")
-    (vhl/add-range 1 3)
-    (vhl/add-range 3 5)
+    (let ((volatile-highlights-mode nil))
+      (volatile-highlights-mode 1)
+      (unwind-protect
+          (progn
+            (vhl/add-range 1 3)
+            (vhl/add-range 3 5))
+        (volatile-highlights-mode -1)))
     (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 2))
     (vhl/clear-all)
     (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0))))
@@ -57,12 +66,20 @@
   "vhl/add-position only highlights when Vhl/highlight-zero-width-ranges is non-nil."
   (with-temp-buffer
     (insert "xyz")
-    (let ((Vhl/highlight-zero-width-ranges nil))
-      (vhl/add-position 2)
+    (let ((Vhl/highlight-zero-width-ranges nil)
+          (volatile-highlights-mode nil))
+      (volatile-highlights-mode 1)
+      (unwind-protect
+          (vhl/add-position 2)
+        (volatile-highlights-mode -1))
       (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))
     (vhl/clear-all)
-    (let ((Vhl/highlight-zero-width-ranges t))
-      (vhl/add-position 2)
+    (let ((Vhl/highlight-zero-width-ranges t)
+          (volatile-highlights-mode nil))
+      (volatile-highlights-mode 1)
+      (unwind-protect
+          (vhl/add-position 2)
+        (volatile-highlights-mode -1))
       (let* ((ovs (vhl/test--vhl-overlays (point-min) (point-max)))
              (ov (car ovs)))
         (should (= (length ovs) 1))
@@ -124,8 +141,12 @@
   "vhl/add-position clamps when POS is beyond buffer size."
   (with-temp-buffer
     (insert "hi")
-    (let ((Vhl/highlight-zero-width-ranges t))
-      (vhl/add-position 10)
+    (let ((Vhl/highlight-zero-width-ranges t)
+          (volatile-highlights-mode nil))
+      (volatile-highlights-mode 1)
+      (unwind-protect
+          (vhl/add-position 10)
+        (volatile-highlights-mode -1))
       (let* ((ovs (vhl/test--vhl-overlays (point-min) (point-max)))
              (ov (car ovs))
              (lastc (buffer-substring-no-properties (1- (point-max)) (point-max))))
@@ -143,6 +164,23 @@
               (should (= (overlay-start ov) (point-max)))
               (should (= (overlay-end ov) (point-max))))))))
     (vhl/clear-all)))
+
+(ert-deftest vhl/test-add-range-noop-when-mode-disabled ()
+  "vhl/add-range is a no-op when volatile-highlights-mode is disabled."
+  (with-temp-buffer
+    (insert "abcdef")
+    (let ((volatile-highlights-mode nil))
+      (vhl/add-range 2 5)
+      (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))))
+
+(ert-deftest vhl/test-add-position-noop-when-mode-disabled ()
+  "vhl/add-position is a no-op when volatile-highlights-mode is disabled."
+  (with-temp-buffer
+    (insert "abc")
+    (let ((volatile-highlights-mode nil)
+          (Vhl/highlight-zero-width-ranges t))
+      (vhl/add-position 2)
+      (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))))
 
 (ert-deftest vhl/test-xref-after-jump-highlights-symbol ()
   "xref after-jump hook highlights the symbol at point."
