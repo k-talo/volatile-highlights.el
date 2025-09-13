@@ -48,7 +48,8 @@ When `volatile-highlights-mode` is active, the following operations will be high
 -   **`yank` and `yank-pop`:** Highlights the newly pasted text.
 -   **Killing commands (`kill-region`, `kill-line`, etc.):** Highlights the region where text was cut.
 -   **Definitions (`xref` on Emacs 25.1+, `find-tag` on older Emacs):** Highlights the destination at point.
--   **`occur`:** Highlights the selected occurrence when jumping from an `*Occur*` buffer.
+-   **`occur` (Emacs < 28):** Highlights the selected occurrence when jumping from an `*Occur*` buffer.
+    On Emacs 28 and newer, `occur` already provides built-in highlighting, so the vhl extension is not used.
 -   **Non-incremental search:** Highlights the found text.
 
 You can enable or disable highlighting for each specific operation through the customization interface.
@@ -111,7 +112,7 @@ You can toggle vhl's xref integration with the customization flag `vhl/use-xref-
 
 ## Extending with Other Packages
 
-`volatile-highlights` can be configured to work with other packages that have their own yank/paste or navigation commands.
+`volatile-highlights` can be configured to work with other packages that have their own yank/paste or insertion/deletion commands.
 
 ### Evil (Extensible Vi Layer)
 
