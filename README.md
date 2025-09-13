@@ -156,12 +156,19 @@ To integrate with `undo-tree`:
     (vhl/install-extension 'undo-tree)))
 ```
 
-## Testing
+## Development: Compile & Test
 
-Run ERT tests in batch:
+- Byte-compile:
+  - Makefile: `make compile`
+  - Direct: `emacs -Q --batch -L . -f batch-byte-compile volatile-highlights.el`
 
-`emacs -Q --batch -L . -l volatile-highlights.el -l test-volatile-highlights.el -f ert-run-tests-batch-and-exit`
+- Run tests (ERT):
+  - Makefile: `make test`
+  - Direct: `emacs -Q --batch -L . -l volatile-highlights.el -l test-volatile-highlights.el -f ert-run-tests-batch-and-exit`
 
-Byte-compile to catch compile-time issues:
+- macOS custom Emacs path example:
+  - `make test EMACS="/Applications/Emacs.app/Contents/MacOS/Emacs"`
+  - Direct: `"/Applications/Emacs.app/Contents/MacOS/Emacs" -Q --batch -L . -l volatile-highlights.el -l test-volatile-highlights.el -f ert-run-tests-batch-and-exit`
 
-`emacs -Q --batch -L . -f batch-byte-compile volatile-highlights.el`
+- Temporary directory note (batch test on restricted environments):
+  - `mkdir -p .tmp && TMPDIR=$PWD/.tmp emacs -Q --batch -L . -l volatile-highlights.el -l test-volatile-highlights.el -f ert-run-tests-batch-and-exit`
