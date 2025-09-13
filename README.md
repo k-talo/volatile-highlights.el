@@ -86,6 +86,8 @@ Here are some examples of how you might configure the package in your `init.el`:
 
 On Emacs 25.1 and newer, use `xref` to navigate to definitions (instead of `find-tag`).
 
+Volatile-highlights includes built-in xref integration (no custom extension needed). It can be toggled via `vhl/use-xref-extension-p` (default: disabled).
+
 By default, xref shows a pulsing highlight after jumps (controlled by `xref-pulse-on-jump`). If you prefer a static highlight, use the configuration below.
 
 Keep static (non-pulsing) highlights, including for xref jumps:

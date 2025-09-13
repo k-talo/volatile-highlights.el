@@ -665,12 +665,17 @@ volatile highlights."
 ;;;============================================================================
 (defvar vhl/.installed-extensions nil)
 
-(defun vhl/install-extension (sym)
+(defun vhl/install-extension (sym &optional disabled-by-default-p)
+  "Install extension SYM, optionally disabled by default.
+
+If DISABLED-BY-DEFAULT-P is non-nil, the customizable flag
+`vhl/use-<sym>-extension-p' will default to nil; otherwise it
+defaults to t."
   (let ((_fn-on  (intern (format "vhl/ext/%s/on" sym)))
         (_fn-off (intern (format "vhl/ext/%s/off" sym)))
         (cust-name (intern (format "vhl/use-%s-extension-p" sym))))
     (cl-pushnew sym vhl/.installed-extensions)
-    (eval `(defcustom ,cust-name t
+    (eval `(defcustom ,cust-name ,(not disabled-by-default-p)
              ,(format "A flag if highlighting support for `%s' is on or not." sym)
              :type 'boolean
              :group 'volatile-highlights
@@ -944,7 +949,7 @@ extensions."
     (when (boundp 'xref-after-return-hook)
       (remove-hook 'xref-after-return-hook #'vhl/ext/xref/.after-jump))))
 
-(vhl/install-extension 'xref)
+(vhl/install-extension 'xref t)
 
 
 ;;-----------------------------------------------------------------------------
