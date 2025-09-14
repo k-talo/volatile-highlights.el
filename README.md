@@ -92,7 +92,8 @@ Here are some examples of how you might configure the package in your `init.el`:
   (vhl/highlight-zero-width-ranges t)
   :config
   ;; You can also set variables directly
-  (setq vhl/animation-iterations 5))
+  (setq vhl/animation-iterations 6)
+  (setq vhl/animation-iteration-delay 0.03))
 ```
 
 ### xref (Emacs 25.1+)
@@ -135,15 +136,20 @@ You can toggle vhl's xref integration with the customization flag `vhl/use-xref-
 
 - Tuning animation smoothness vs. cost:
   - `vhl/animation-iterations`: steps per animation. Higher is smoother but costs more CPU. Typical 6-12.
-  - `vhl/animation-iteration-delay`: delay per step (seconds). Lower is faster. Typical 0.01-0.03.
+  - `vhl/animation-iteration-delay`: delay per step (seconds). Lower is faster. Typical 0.03-0.05.
   - `vhl/animation-start-delay`: delay before animation begins (seconds). For animated styles, the delay is counted after Emacs becomes idle (idle timer), which prevents animations from interrupting rapid command sequences and adding perceived lag. Set to 0 to start as soon as Emacs becomes idle; 0.1-0.2 often keeps the UI responsive during bursts of edits. For `'static`, there is no idle wait and highlights appear immediately for the best responsiveness.
+
+- Suggested starting points (tune to taste):
+  - `'fade-in`: `vhl/animation-iterations` = 6, `vhl/animation-iteration-delay` = 0.03
+  - `'pulse`: `vhl/animation-iterations` = 12, `vhl/animation-iteration-delay` = 0.05
+  - For `vhl/animation-start-delay`, values that are too small can feel sticky during rapid edits, while too large values can feel sluggish. 0.1-0.2 is a common sweet spot.
 
 - Environments and fallback:
   - On frames where color changes are unavailable or limited (e.g., some TTYs), animations are skipped and highlights fall back to static.
   - If motion feels jittery or heavy, reduce `vhl/animation-iterations` or increase `vhl/animation-iteration-delay`.
 
 - Example tuning:
-  - Smooth but light fade-in: `vhl/highlight-animation-style` -> `'fade-in`, `vhl/animation-iterations` -> 8, `vhl/animation-iteration-delay` -> 0.02, `vhl/animation-start-delay` -> 0.1.
+  - Smooth but light fade-in: `vhl/highlight-animation-style` -> `'fade-in`, `vhl/animation-iterations` -> 6, `vhl/animation-iteration-delay` -> 0.03, `vhl/animation-start-delay` -> 0.1.
   - Battery/remote friendly: `'static` style, or keep `'fade-in` with 6 iterations and 0.03 delay.
 
 ## Extending with Other Packages

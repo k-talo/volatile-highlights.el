@@ -80,10 +80,10 @@
 ;;   (volatile-highlights-mode 1)
 ;;
 ;;    - `vhl/animation-start-delay'
-;;      Delay before the highlight animation begins in seconds. For
+;;      Delay before the highlight animation begins in seconds.  For
 ;;      animated styles, this delay is counted after Emacs becomes idle
 ;;      (idle timer) to avoid interrupting rapid command sequences; set
-;;      to 0 to start as soon as Emacs is idle. For 'static, highlights
+;;      to 0 to start as soon as Emacs is idle.  For 'static, highlights
 ;;      appear immediately without waiting for idle.
 ;;
 ;;      Default value is `0.15'.
@@ -326,8 +326,8 @@ Choose how highlights animate:
    then clear automatically when the animation ends.
 
 Timing and responsiveness:
- - Animated styles run on an idle timer after Emacs becomes idle, and
-   honor `vhl/animation-start-delay'. This avoids animations interrupting
+  - Animated styles run on an idle timer after Emacs becomes idle, and
+   honor `vhl/animation-start-delay'.  This avoids animations interrupting
    rapid command sequences.
  - \='static shows highlights immediately (no idle wait) and is the most
    responsive option.
@@ -366,45 +366,49 @@ When set: nil -> \='static, -1 -> \='fade-in, other non-nil -> \='pulse."
                 ((and (numberp val) (= val -1)) 'fade-in)
                 (t 'pulse)))))
 
-(defcustom vhl/animation-iterations 8
-  "Number of iterations for the highlight animation.
-
-Higher values are smoother but increase CPU cost. Applies to both
-\='fade-in and \='pulse styles. Typical values range from 6 to 12."
-  :type 'number
-  :group 'volatile-highlights)
-
-(defcustom vhl/animation-start-delay 0.15
-  "Delay (seconds) before starting the highlight animation.
-
-For animated styles ('fade-in or 'pulse), this delay is counted after
-Emacs becomes idle; the animation runs on an idle timer. This design
-avoids animations interrupting rapid command sequences and adding
-perceived lag during bursts of edits. Set this to 0 to start as soon
-as Emacs becomes idle (still after the command returns).
-
-For 'static, there is no idle wait and highlights appear immediately,
-providing the best responsiveness."
-  :type 'number
-  :group 'volatile-highlights)
-
-(defcustom vhl/animation-iteration-delay 0.02
-  "Delay between iterations of the highlight animation in seconds.
-
-Lower values speed up the animation but may cost more CPU; higher
-values slow it down. Applies to both \='fade-in and \='pulse styles.
-Typical values range from 0.01 to 0.03."
-  :type 'number
-  :group 'volatile-highlights)
-
 ;; Backward compatibility for renamed animation defcustoms.
-;; Keep old `vhl/pulse-*' user options as obsolete aliases.
+;; Keep old `vhl/pulse-*' user options as obsolete aliases. Declare
+;; aliases before their referents to satisfy the byte-compiler.
 (define-obsolete-variable-alias 'vhl/pulse-iterations
   'vhl/animation-iterations "1.19")
 (define-obsolete-variable-alias 'vhl/pulse-start-delay
   'vhl/animation-start-delay "1.19")
 (define-obsolete-variable-alias 'vhl/pulse-iteration-delay
   'vhl/animation-iteration-delay "1.19")
+
+(defcustom vhl/animation-iterations 9
+  "Number of iterations for the highlight animation.
+
+Higher values are smoother but increase CPU cost.  Applies to both
+\='fade-in and \='pulse styles.  Typical values range from 6 to 12.
+Suggested starting points: \='fade-in: 6, \='pulse: 12."
+  :type 'number
+  :group 'volatile-highlights)
+
+(defcustom vhl/animation-start-delay 0.15
+  "Delay (seconds) before starting the highlight animation.
+
+For animated styles (\='fade-in or \='pulse), this delay is counted after
+Emacs becomes idle; the animation runs on an idle timer.  This design
+avoids animations interrupting rapid command sequences and adding
+perceived lag during bursts of edits.  Set this to 0 to start as soon
+as Emacs becomes idle (still after the command returns).
+
+For \='static, there is no idle wait and highlights appear immediately,
+providing the best responsiveness.  A common sweet spot for
+`vhl/animation-start-delay' is 0.1-0.2 seconds; tune to taste."
+  :type 'number
+  :group 'volatile-highlights)
+
+(defcustom vhl/animation-iteration-delay 0.04
+  "Delay between iterations of the highlight animation in seconds.
+
+Lower values speed up the animation but may cost more CPU; higher
+values slow it down.  Applies to both \='fade-in and \='pulse styles.
+Typical values range from 0.03 to 0.05.  Suggested starting points:
+\='fade-in: 0.03, \='pulse: 0.05."
+  :type 'number
+  :group 'volatile-highlights)
 
 (define-obsolete-variable-alias 'Vhl/highlight-zero-width-ranges
   'vhl/highlight-zero-width-ranges "1.19")
