@@ -1,13 +1,14 @@
-;;; volatile-highlights.el --- Minor mode for visual feedback on some operations. -*- lexical-binding: t; -*-
+;;; volatile-highlights.el --- Transient visual feedback for edits. -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2001, 2010-2016, 2024 K-talo Miyazaki, all rights reserved.
+;; Copyright (C) 2001, 2010-2016, 2024-2025 K-talo Miyazaki
 
 ;; Author: K-talo Miyazaki <Keitaro dot Miyazaki at gmail dot com>
+;; Maintainer: K-talo Miyazaki <Keitaro dot Miyazaki at gmail dot com>
 ;; Created: 03 October 2001. (as utility functions in my `.emacs' file.)
 ;;          14 March   2010. (re-written as library `volatile-highlights.el')
 ;; Keywords: emulations convenience wp
-;; URL: http://www.emacswiki.org/emacs/download/volatile-highlights.el
-;; GitHub: http://github.com/k-talo/volatile-highlights.el
+;; URL: https://github.com/k-talo/volatile-highlights.el
+;; Package-Requires: ((emacs "24.4"))
 ;; Version: 1.18
 ;; Contributed by: Ryan Thompson and Le Wang.
 
@@ -29,96 +30,51 @@
 ;;; Commentary:
 ;;
 ;; Overview
-;; ========
-;; This library provides minor mode `volatile-highlights-mode', which
-;; brings visual feedback to some operations by highlighting portions
-;; relating to the operations.
+;; --------
+;; `volatile-highlights-mode' is a global minor mode that provides
+;; transient, visual feedback for common editing operations.  After an
+;; operation completes, the affected text is highlighted briefly and
+;; cleared on the next user command.
 ;;
-;; All of highlights made by this library will be removed
-;; when any new operation is executed.
+;; Features (when the mode is enabled):
+;; - undo: highlight the text restored by undo
+;; - yank and yank-pop: highlight inserted text
+;; - kill/delete: show where text used to be (optionally as a point)
+;; - definitions: Emacs 25.1+ uses xref; older Emacs use find-tag
+;; - occur: Emacs < 28 only (Emacs 28+ has built-in occur highlighting)
+;; - non-incremental search commands
+;; - hideshow: highlight shown blocks
 ;;
+;; Customization
+;; ------------
+;; Customize the group `volatile-highlights' (M-x customize-group RET
+;; volatile-highlights RET).
+;; - vhl/use-pulsing-visual-effect-p (default: nil): use a pulsing
+;;   effect instead of a static highlight when clearing.
+;; - Vhl/highlight-zero-width-ranges (default: nil): also mark deletion
+;;   points as a 1-character highlight.
+;; - vhl/default-face: face used for highlights; adjust to match your theme.
+;; Per-feature toggles are available via `vhl/use-<name>-extension-p'.
+;; The xref integration is available but defaults to disabled.
+;;
+;; Notes for developers
+;; --------------------
+;; - The public APIs `vhl/add-range' and `vhl/add-position' are
+;;   mode-aware and act as no-ops when `volatile-highlights-mode' is
+;;   disabled.
+;; - To integrate with your own commands, compute the range to
+;;   highlight and call these APIs.  See docs/extending.md for patterns
+;;   and examples.
+;;
+;; See README.md for installation and quick configuration, and
+;; docs/extending.md for integration patterns and API reference.
 ;;
 ;; INSTALLING
-;; ==========
-;; To install this library, save this file to a directory in your
-;; `load-path' (you can view the current `load-path' using "C-h v
-;; load-path" within Emacs), then add the following line to your
-;; .emacs start up file:
+;; ----------
+;; Place this file on your `load-path', then enable the mode globally:
 ;;
-;;    (require 'volatile-highlights)
-;;    (volatile-highlights-mode t)
-;;
-;;
-;; USING
-;; =====
-;; To toggle volatile highlighting, type `M-x volatile-highlights-mode <RET>'.
-;;
-;; While this minor mode is on, a string `VHl' will be displayed on the modeline.
-;;
-;; Currently, operations listed below will be highlighted While the minor mode
-;; `volatile-highlights-mode' is on:
-;;
-;;    - `undo':
-;;      Volatile highlights will be put on the text inserted by `undo'.
-;;
-;;    - `yank' and `yank-pop':
-;;      Volatile highlights will be put on the text inserted by `yank'
-;;      or `yank-pop'.
-;;
-;;    - `kill-region', `kill-line', any other killing function:
-;;      Volatile highlights will be put at the positions where the
-;;      killed text used to be.
-;;
-;;    - `delete-region':
-;;      Same as `kill-region', but not as reliable since
-;;      `delete-region' is an inline function.
-;;
-;;    - `find-tag':
-;;      Volatile highlights will be put on the tag name which was found
-;;      by `find-tag'.
-;;
-;;    - `occur-mode-goto-occurrence' and `occur-mode-display-occurrence':
-;;      Volatile highlights will be put on the occurrence which is selected
-;;      by `occur-mode-goto-occurrence' or `occur-mode-display-occurrence'.
-;;
-;;    - Non incremental search operations:
-;;      Volatile highlights will be put on the the text found by
-;;      commands listed below:
-;;
-;;        `nonincremental-search-forward'
-;;        `nonincremental-search-backward'
-;;        `nonincremental-re-search-forward'
-;;        `nonincremental-re-search-backward'
-;;        `nonincremental-repeat-search-forward'
-;;        `nonincremental-repeat-search-backwar'
-;;
-;; Highlighting support for each operations can be turned on/off individually
-;; via customization. Also check out the customization group
-;;
-;;   `M-x customize-group RET volatile-highlights RET'
-;;
-;;
-;; ADJUSTING THE LOOKS TO SUIT YOUR TASTE
-;; ======================================
-;; The following user options are provided to help you get the look you want:
-;;
-;;    - `vhl/use-pulsing-visual-effect-p'
-;;      Whether to use visual effect 'pulsing' for volatile highlighting.
-;;      Pulsing involves a bright highlight that slowly shifts to the
-;;      background color.
-;;
-;;      If the value is nil, highlight with an unchanging color until
-;;      next command occurs.
-;;
-;;      If `vhl/use-pulsing-visual-effect-p' is non-nil, but the return value of
-;;      the function `vhl/pulse/available-p' is nil, then this flag is ignored.
-;;
-;;      Default value is `nil'.
-;;
-;;    - `vhl/pulse-iterations'
-;;      Number of iterations of a pulse animation for volatile highlights.
-;;
-;;      Default value is `8'.
+;;   (require 'volatile-highlights)
+;;   (volatile-highlights-mode 1)
 ;;
 ;;    - `vhl/pulse-start-delay'
 ;;      Delay before pulse animation begins in seconds.
@@ -276,6 +232,7 @@
   (require 'cl-lib)
   (require 'easy-mmode)
   (require 'advice))
+(require 'cl-lib)
 (require 'color)
 (require 'thingatpt)
 
@@ -315,7 +272,7 @@
 
 ;; Borrowed from `slime.el'.
 (defun vhl/.face-inheritance-possible-p ()
-  "Return true if the :inherit face attribute is supported."
+  "Return non-nil if the :inherit face attribute is supported."
   (assq :inherit custom-face-attributes))
 
 (defface vhl/default-face
@@ -331,7 +288,9 @@
     '((t
        :inherit secondary-selection
        ))))
-    "Face used for volatile highlights."
+    "Face used for volatile highlights.
+
+Adjust this face to match your theme for clear, unobtrusive feedback."
     :group 'volatile-highlights)
 
 
@@ -342,8 +301,8 @@
 ;;;============================================================================
 ;;;###autoload
 (defun volatile-highlights-mode (&optional _arg1)
-  ;; We define a just dummy function for autoload mechanism of package.el.
-  "Minor mode for visual feedback on some operations.")
+  ;; Dummy for autoloading; the real mode is defined below.
+  "Global minor mode for transient visual feedback on common operations.")
 
 (eval-and-compile
   ;; 'easy-mmode-define-minor-mode' is obsoleted alias (as of 30.1)
@@ -352,7 +311,17 @@
     (defalias 'vhl/define-minor-mode 'easy-mmode-define-minor-mode)))
 
 (vhl/define-minor-mode
- volatile-highlights-mode "Minor mode for visual feedback on some operations."
+ volatile-highlights-mode
+ "Global minor mode for transient visual feedback on common operations.
+
+When enabled, operations such as undo, yank, kill/delete,
+definition jumps (xref on Emacs 25.1+, `find-tag' on older Emacs),
+occur (on Emacs < 28), non-incremental search, and hideshow will
+briefly highlight the affected text. Highlights are cleared on the
+next user command.
+
+Customize the group `volatile-highlights' for per-feature toggles
+and appearance."
  :global t
  :init-value nil
  :lighter " VHl"
@@ -392,10 +361,10 @@ If `vhl/use-pulsing-visual-effect-p' is non-nil, but the return value of the
   :group 'volatile-highlights)
 
 (defcustom Vhl/highlight-zero-width-ranges nil
-  "If t, highlight the positions of zero-width ranges.
+  "When non-nil, also mark deletion points as 1-character highlights.
 
-For example, if a deletion is highlighted, then the position
-where the deleted text used to be would be highlighted."
+This is useful to indicate where text used to be after a delete/kill
+operation.  The helper `vhl/add-position' respects this setting."
   :type 'boolean
   :group 'volatile-highlights)
 
@@ -410,17 +379,13 @@ where the deleted text used to be would be highlighted."
 ;; (vhl/add-range BEG END &OPTIONAL BUF FACE) => VOID
 ;;-----------------------------------------------------------------------------
 (defun vhl/add-range (beg end &optional buf face)
-  "Add a volatile highlight to the buffer `BUF' at the position
-specified by `BEG' and `END' using the face `FACE'.
+  "Add a transient highlight for the region [BEG, END) in buffer BUF.
 
-When the buffer `BUF' is not specified or its value is `nil',
-volatile highlight will be added to current buffer.
+The highlight uses FACE (defaults to `vhl/default-face').  When BUF is
+nil, the current buffer is used.
 
-When the face `FACE' is not specified or its value is `nil',
-the default face `vhl/default-face' will
-be used as the value.
-
-If `volatile-highlights-mode' is disabled, this function does nothing."
+Highlights are cleared on the next user command.  When
+`volatile-highlights-mode' is disabled, this function is a no-op."
   (when volatile-highlights-mode
     (let* ((face (or face 'vhl/default-face))
 		   (hl (vhl/.make-hl beg end buf face)))
@@ -447,13 +412,11 @@ If `volatile-highlights-mode' is disabled, this function does nothing."
 ;; (vhl/add-position POS &OPTIONAL BUF FACE) => VOID
 ;;-----------------------------------------------------------------------------
 (defun vhl/add-position (pos &rest other-args)
-  "Highlight buffer position POS as a change.
+  "Mark buffer position POS as a 1-character highlight.
 
-If Vhl/highlight-zero-width-ranges is nil, do nothing.
-
-Optional args are the same as `vhl/add-range'.
-
-When `volatile-highlights-mode' is disabled, this function is a no-op."
+Does nothing unless `Vhl/highlight-zero-width-ranges' is non-nil.
+Optional argument OTHER-ARGS are the same as for `vhl/add-range'.  When
+`volatile-highlights-mode' is disabled, this function is a no-op."
   (when (and Vhl/highlight-zero-width-ranges (not (zerop (buffer-size))))
     (when (> pos (buffer-size))
         (setq pos (- pos 1)))
@@ -463,7 +426,7 @@ When `volatile-highlights-mode' is disabled, this function is a no-op."
 ;; (vhl/clear-all) => VOID
 ;;-----------------------------------------------------------------------------
 (defun vhl/clear-all ()
-  "Clear all volatile highlights."
+  "Clear all volatile highlight overlays."
   (interactive)
   (while vhl/.hl-lst
 	(vhl/.clear-hl (car vhl/.hl-lst))
@@ -476,7 +439,7 @@ When `volatile-highlights-mode' is disabled, this function is a no-op."
 ;; (vhl/force-clear-all) => VOID
 ;;-----------------------------------------------------------------------------
 (defun vhl/force-clear-all ()
-  "Force clear all volatile highlights in current buffer."
+  "Unconditionally clear all volatile highlight overlays in the current buffer."
   (interactive)
   (vhl/.force-clear-all-hl))
 
@@ -491,7 +454,7 @@ When `volatile-highlights-mode' is disabled, this function is a no-op."
 ;; (vhl/.make-hl BEG END BUF FACE) => HIGHLIGHT
 ;;-----------------------------------------------------------------------------
 (defun vhl/.make-hl (beg end buf face)
-  "Make a volatile highlight at the position specified by `BEG' and `END'."
+  "Create and return a highlight overlay from BEG to END in BUF using FACE."
   (let (hl)
 	(cond
 	 (vhl/.xemacsp
@@ -512,7 +475,7 @@ When `volatile-highlights-mode' is disabled, this function is a no-op."
 ;; (vhl/.clear-hl HIGHLIGHT) => VOID
 ;;-----------------------------------------------------------------------------
 (defun vhl/.clear-hl (hl)
-  "Clear one highlight."
+  "Clear one highlight overlay HL."
   (cond
    ;; XEmacs (not tested!)
    (vhl/.xemacsp
@@ -527,7 +490,7 @@ When `volatile-highlights-mode' is disabled, this function is a no-op."
 ;; (vhl/.force-clear-all-hl) => VOID
 ;;-----------------------------------------------------------------------------
 (defun vhl/.force-clear-all-hl ()
-  "Force clear all volatile highlights in current buffer."
+  "Unconditionally clear all volatile highlight overlays in the current buffer."
   (cond
    ;; XEmacs (not tested!)
    (vhl/.xemacsp
@@ -566,7 +529,7 @@ When `volatile-highlights-mode' is disabled, this function is a no-op."
 ;; (vhl/pulse/reset FACE) => VOID
 ;;-----------------------------------------------------------------------------
 (defun vhl/pulse/reset ()
-  "Reset information for pulsing volatile highlights."
+  "Reset pulsing state for volatile highlight overlays."
   (interactive)
   (dolist (face vhl/pulse/.faces-to-pulse-lst)
     (vhl/pulse/reset-face face))
@@ -579,8 +542,10 @@ When `volatile-highlights-mode' is disabled, this function is a no-op."
 ;; (vhl/pulse/reset-face FACE) => VOID
 ;;-----------------------------------------------------------------------------
 (defun vhl/pulse/reset-face (face)
-  "Restore background color of FACE and forget information for pulsing
-volatile highlights."
+  "Restore the background color of FACE and forget pulsing metadata.
+
+This resets any temporary attributes used for the pulse animation so
+future highlights start from the face's original background."
   (interactive (list (read-face-name "Reset face for pulse"
                                      (or (face-at-point t) 'default)
                                      t)))
@@ -602,7 +567,7 @@ volatile highlights."
 ;; (vhl/pulse/.make-color-gradient FACE) => LIST OF COLORS
 ;;-----------------------------------------------------------------------------
 (defun vhl/pulse/.make-color-gradient (face)
-  ;; Make a list of gradient colors for pulse animation.
+  "Return a list of gradient colors for pulsing FACE."
 
   ;; This part is taken from `pulse-momentary-highlight-overlay' in
   ;; `pulse.el' by Eric M. Ludlam.
@@ -617,8 +582,7 @@ volatile highlights."
 ;; (vhl/pulse/.prepare-for-face FACE) => VOID
 ;;-----------------------------------------------------------------------------
 (defun vhl/pulse/.prepare-for-face (face)
-  ;; Save the original background color of FACE for restoration,
-  ;; then get gradient colors for pulse animation.
+  "Prepare FACE for pulsing by saving its original background and gradient."
   (when (and (facep face)
              ;; do nothing the face is already set up.
              (null (get face 'vhl/pulse/orig-bg-color)))
@@ -630,8 +594,10 @@ volatile highlights."
 ;; (vhl/pulse/.do-it FACE) => VOID
 ;;-----------------------------------------------------------------------------
 (defun vhl/pulse/.do-it ()
-  ;; Make volatile highlights pulsing by changing background color of
-  ;; each faces step by step.
+  "Advance the pulse: step each scheduled face along its gradient.
+
+On each tick, update background colors using the precomputed gradient.
+If no colors remain, clear highlights and reset the internal timer/state; otherwise reschedule."
   (let (has-pending-gradient-colors-p)
     (dolist (face vhl/pulse/.faces-to-pulse-lst)
       (vhl/pulse/.prepare-for-face face)
@@ -668,14 +634,16 @@ volatile highlights."
 ;;;  Functions to manage extensions.
 ;;;
 ;;;============================================================================
-(defvar vhl/.installed-extensions nil)
+(defvar vhl/.installed-extensions nil
+  "List of symbols naming installed volatile-highlights extensions.")
 
 (defun vhl/install-extension (sym &optional disabled-by-default-p)
-  "Install extension SYM, optionally disabled by default.
+  "Install extension SYM and define its user option.
 
-If DISABLED-BY-DEFAULT-P is non-nil, the customizable flag
-`vhl/use-<sym>-extension-p' will default to nil; otherwise it
-defaults to t."
+Define the customizable variable `vhl/use-SYM-extension-p' (where SYM
+is the extension name) which toggles tracking for SYM.  If
+DISABLED-BY-DEFAULT-P is non-nil, the option defaults to nil;
+otherwise it defaults to t."
   (let ((_fn-on  (intern (format "vhl/ext/%s/on" sym)))
         (_fn-off (intern (format "vhl/ext/%s/off" sym)))
         (cust-name (intern (format "vhl/use-%s-extension-p" sym))))
@@ -692,6 +660,7 @@ defaults to t."
                       (vhl/unload-extension (quote ,sym))))))))
 
 (defun vhl/load-extension (sym)
+  "Load and activate extension SYM when its user option is enabled."
   (let ((fn-on  (intern (format "vhl/ext/%s/on" sym)))
         (cust-name (intern (format "vhl/use-%s-extension-p" sym))))
     (if (functionp fn-on)
@@ -701,16 +670,19 @@ defaults to t."
       (message "[vhl] No load function for extension  `%s'" sym))))
 
 (defun vhl/unload-extension (sym)
+  "Deactivate and unload extension SYM if available."
   (let ((fn-off (intern (format "vhl/ext/%s/off" sym))))
     (if (functionp fn-off)
         (apply fn-off nil)
       (message "[vhl] No unload function for extension  `%s'" sym))))
 
 (defun vhl/load-extensions ()
+  "Load all installed volatile-highlights extensions."
   (dolist (sym vhl/.installed-extensions)
     (vhl/load-extension sym)))
 
 (defun vhl/unload-extensions ()
+  "Unload all installed volatile-highlights extensions."
   (dolist (sym vhl/.installed-extensions)
     (vhl/unload-extension sym)))
 
@@ -720,9 +692,11 @@ defaults to t."
 ;;;  Utility functions/macros for extensions.
 ;;;
 ;;;============================================================================
-(defvar vhl/.after-change-hook-depth 0)
+(defvar vhl/.after-change-hook-depth 0
+  "Nest level counting active after-change tracking for VHL advice.")
 
 (defun vhl/.push-to-after-change-hook (_fn-name)
+  "Start tracking buffer modifications during an advised call."
   ;; Debug
   ;; (if (zerop vhl/.after-change-hook-depth)
   ;;     (message "vlh: push: %s" _fn-name)
@@ -734,6 +708,7 @@ defaults to t."
         (1+ vhl/.after-change-hook-depth)))
 
 (defun vhl/.pop-from-after-change-hook (_fn-name)
+  "Stop tracking buffer modifications when the advised call finishes."
   (setq vhl/.after-change-hook-depth
         (1- vhl/.after-change-hook-depth))
   ;; Debug
@@ -745,6 +720,10 @@ defaults to t."
                  'vhl/.make-vhl-on-change)))
 
 (defun vhl/.make-vhl-on-change (beg end len-removed)
+  "Record a highlight for the change between BEG and END.
+
+If LEN-REMOVED is zero, highlight the inserted region; otherwise mark
+the deletion point (subject to `Vhl/highlight-zero-width-ranges')."
   (let ((insert-p (zerop len-removed)))
     (if insert-p
         ;; Highlight the insertion
@@ -753,13 +732,17 @@ defaults to t."
       (vhl/add-position beg))))
 
 (defmacro vhl/give-advice-to-make-vhl-on-changes (fn-name)
+  "Generate around-advice to track buffer modifications in FN-NAME.
+
+Wrap FN-NAME so that buffer modifications during its call produce
+volatile highlights."
   (let* ((ad-name (intern (concat "vhl/.advice-callback-fn/.make-vhl-on-"
                                   (format "%s" fn-name))))
          (g-orig-fn  (gensym))
          (g-orig-ret (gensym))
          (g-args     (gensym)))
     (or (symbolp fn-name)
-        (error "vhl/give-advice-to-make-vhl-on-changes: `%s' is not type of symbol." fn-name))
+        (error "vhl/give-advice-to-make-vhl-on-changes: `%s' is not type of symbol" fn-name))
     `(progn
        (defun ,ad-name (,g-orig-fn &rest ,g-args)
          (let (,g-orig-ret)
@@ -770,11 +753,13 @@ defaults to t."
        (advice-add  (quote ,fn-name) :around (function ,ad-name)))))
 
 (defmacro vhl/cancel-advice-to-make-vhl-on-changes (fn-name)
+  "Remove the around-advice installed for FN-NAME by `vhl/give-advice-to-make-vhl-on-changes'."
   (let ((ad-name (intern (concat "vhl/.advice-callback-fn/.make-vhl-on-"
-                                 (format "%s" fn-name)))))
+                                  (format "%s" fn-name)))))
     `(advice-remove (quote ,fn-name) (quote ,ad-name))))
 
 (defun vhl/require-noerror (feature &optional _filename)
+  "Require FEATURE, returning nil instead of signaling a file error."
   (condition-case _c
       (require feature)
     (file-error nil)))
@@ -782,11 +767,11 @@ defaults to t."
 (eval-and-compile
 ;; Utility function by Ryan Thompson.
 (defun vhl/.make-list-string (items)
-  "Makes an English-style list from a list of strings.
+  "Make an English-style list from a list of strings.
 
-Converts a list of strings into a string that lists the items
+Convert a list of strings into a string that lists the ITEMS
 separated by commas, as well as the word `and' before the last
-item. In other words, returns a string of the way those items
+item.  In other words, return a string of the way those items
 would be listed in english.
 
 This is included as a private support function for generating
@@ -817,8 +802,12 @@ extensions."
 
 ;; The following makes it trivial to define simple vhl extensions
 (defmacro vhl/define-extension (name &rest functions)
-  "Define a VHL extension called NAME that applies standard VHL
-  advice to each of FUNCTIONS."
+  "Define a VHL extension called NAME and apply standard advice.
+
+Apply volatile-highlights change tracking to each of FUNCTIONS so
+insertions and deletions are highlighted.  Define interactive commands
+`vhl/ext/NAME/on' and `vhl/ext/NAME/off' to enable or disable tracking
+for NAME."
   (cl-assert (cl-first functions))
   (let* ((name-string (symbol-name (eval name)))
          (function-list-string (vhl/.make-list-string
@@ -901,10 +890,11 @@ extensions."
 ;;   -- Put volatile highlights on the tag name which was found by `find-tag'.
 ;;-----------------------------------------------------------------------------
 (defun vhl/ext/etags/.after-find-tag (tagname &optional _next-p _regexp-p)
-    (let ((len (length tagname)))
-      (save-excursion
-        (search-forward tagname)
-        (vhl/add-range (- (point) len) (point)))))
+  "Highlight the found TAGNAME after `find-tag'."
+  (let ((len (length tagname)))
+    (save-excursion
+      (search-forward tagname)
+      (vhl/add-range (- (point) len) (point)))))
 
   (defun vhl/ext/etags/on ()
   "Turn on volatile highlighting for `etags'."
@@ -921,11 +911,11 @@ extensions."
 
 ;;-----------------------------------------------------------------------------
 ;; Extension for supporting xref jumps.
-;;   -- Add a non-pulsing volatile highlight after xref jumps and returns.
+;;   -- Add a non-pulsing volatile highlight after xref jump/return events.
 ;;-----------------------------------------------------------------------------
 
 (defun vhl/ext/xref/.highlight-current-symbol-or-line ()
-  "Highlight the current `symbol' or the current line as a fallback."
+  "Highlight the current symbol or the current line as a fallback."
   (let* ((bnds (bounds-of-thing-at-point 'symbol))
          (beg (car-safe bnds))
          (end (cdr-safe bnds)))
@@ -934,7 +924,7 @@ extensions."
       (vhl/add-range (line-beginning-position) (line-end-position)))))
 
 (defun vhl/ext/xref/.after-jump (&rest _args)
-  "Hook run after xref jumps/returns to place a volatile highlight."
+  "Run after xref jump/return events to place a volatile highlight."
   (vhl/ext/xref/.highlight-current-symbol-or-line))
 
 (defun vhl/ext/xref/on ()
@@ -961,9 +951,11 @@ extensions."
 ;;   -- Put volatile highlights on occurrence which is selected by
 ;;      `occur-mode-goto-occurrence' or `occur-mode-display-occurrence'.
 ;;-----------------------------------------------------------------------------
-(defvar vhl/ext/occur/*occur-str* "") ;; Text in current line.
+(defvar vhl/ext/occur/*occur-str* ""
+  "String of the current occur line (sans line number), used for highlighting.")
 
 (defun vhl/ext/occur/.before-hook-fn (&rest _args)
+  "Capture the current occur line (without the line number prefix) before jumping."
   (save-excursion
     (let* ((bol (progn (beginning-of-line) (point)))
            (eol (progn (end-of-line) (point))))
@@ -988,6 +980,7 @@ Returns a list of (beg . end), or nil if not found."
     (reverse be-lst)))
 
 (defun vhl/ext/occur/.str-has-face-at-pos-p (str face pos)
+  "Return non-nil if STR has FACE at position POS."
   (let ((found-face (get-text-property pos 'face str)))
     (cond
      ((listp found-face)
@@ -997,6 +990,7 @@ Returns a list of (beg . end), or nil if not found."
      (t nil))))
 
 (defun vhl/ext/occur/.find-face-ranges-in-str-aux (str face pos)
+  "Return one FACE range (beg . end) in STR starting at POS."
   (let ((ptr pos)
         (len (length str))
         beg end)
@@ -1020,6 +1014,7 @@ Returns a list of (beg . end), or nil if not found."
     (cons beg end)))
 
 (defun vhl/ext/occur/.after-hook-fn (&rest _args)
+  "Highlight the corresponding text in the target buffer after occur jump."
   (let ((marker (and vhl/ext/occur/*occur-str*
                      (get-text-property 0 'occur-target vhl/ext/occur/*occur-str*)))
         (be-lst nil))
@@ -1063,15 +1058,21 @@ Returns a list of (beg . end), or nil if not found."
 
   (if (< emacs-major-version 28)
       (progn
-        (advice-add 'occur-mode-goto-occurrence :before #'vhl/ext/occur/.before-hook-fn)
-        (advice-add 'occur-mode-goto-occurrence :after #'vhl/ext/occur/.after-hook-fn)
-        
-        (advice-add 'occur-mode-display-occurrence :before #'vhl/ext/occur/.before-hook-fn)
-        (advice-add 'occur-mode-display-occurrence :after #'vhl/ext/occur/.after-hook-fn)
-        
-        (advice-add 'occur-mode-goto-occurrence-other-window :before #'vhl/ext/occur/.before-hook-fn)
-        (advice-add 'occur-mode-goto-occurrence-other-window :after #'vhl/ext/occur/.after-hook-fn))
-    (message "`occur' command on Emacs >= 28 has volatile highlight feature, so `vhl/ext/occur' is not required.")))
+        (advice-add 'occur-mode-goto-occurrence
+                    :before #'vhl/ext/occur/.before-hook-fn)
+        (advice-add 'occur-mode-goto-occurrence
+                    :after  #'vhl/ext/occur/.after-hook-fn)
+
+        (advice-add 'occur-mode-display-occurrence
+                    :before #'vhl/ext/occur/.before-hook-fn)
+        (advice-add 'occur-mode-display-occurrence
+                    :after  #'vhl/ext/occur/.after-hook-fn)
+
+        (advice-add 'occur-mode-goto-occurrence-other-window
+                    :before #'vhl/ext/occur/.before-hook-fn)
+        (advice-add 'occur-mode-goto-occurrence-other-window
+                    :after  #'vhl/ext/occur/.after-hook-fn))
+    (message "Emacs 28+ has built-in occur highlighting; vhl/ext/occur is not needed.")))
 
 (defun vhl/ext/occur/off ()
   "Turn off volatile highlighting for `occur'."
@@ -1100,6 +1101,7 @@ Returns a list of (beg . end), or nil if not found."
 ;;-----------------------------------------------------------------------------
 
 (defun vhl/ext/nonincremental-search/.filter-return-fn (retval)
+  "Highlight the last match when RETVAL is non-nil."
   (when retval
     (vhl/add-range (match-beginning 0) (match-end 0) nil 'match)))
 
@@ -1107,23 +1109,41 @@ Returns a list of (beg . end), or nil if not found."
   "Turn on volatile highlighting for non-incremental search operations."
   (interactive)
   (when (vhl/require-noerror 'menu-bar nil)
-    (advice-add 'nonincremental-search-forward :filter-return #'vhl/ext/nonincremental-search/.filter-return-fn)
-    (advice-add 'nonincremental-search-backward :filter-return #'vhl/ext/nonincremental-search/.filter-return-fn)
-    (advice-add 'nonincremental-re-search-forward :filter-return #'vhl/ext/nonincremental-search/.filter-return-fn)
-    (advice-add 'nonincremental-re-search-backward :filter-return #'vhl/ext/nonincremental-search/.filter-return-fn)
-    (advice-add 'nonincremental-repeat-search-forward :filter-return #'vhl/ext/nonincremental-search/.filter-return-fn)
-    (advice-add 'nonincremental-repeat-search-backward :filter-return #'vhl/ext/nonincremental-search/.filter-return-fn)))
+    (advice-add 'nonincremental-search-forward
+                :filter-return
+                #'vhl/ext/nonincremental-search/.filter-return-fn)
+    (advice-add 'nonincremental-search-backward
+                :filter-return
+                #'vhl/ext/nonincremental-search/.filter-return-fn)
+    (advice-add 'nonincremental-re-search-forward
+                :filter-return
+                #'vhl/ext/nonincremental-search/.filter-return-fn)
+    (advice-add 'nonincremental-re-search-backward
+                :filter-return
+                #'vhl/ext/nonincremental-search/.filter-return-fn)
+    (advice-add 'nonincremental-repeat-search-forward
+                :filter-return
+                #'vhl/ext/nonincremental-search/.filter-return-fn)
+    (advice-add 'nonincremental-repeat-search-backward
+                :filter-return
+                #'vhl/ext/nonincremental-search/.filter-return-fn)))
 
 (defun vhl/ext/nonincremental-search/off ()
   "Turn off volatile highlighting for  non-incremental search operations."
   (interactive)
   (when (vhl/require-noerror 'menu-bar nil)
-    (advice-remove 'nonincremental-search-forward #'vhl/ext/nonincremental-search/.filter-return-fn)
-    (advice-remove 'nonincremental-search-backward #'vhl/ext/nonincremental-search/.filter-return-fn)
-    (advice-remove 'nonincremental-re-search-forward #'vhl/ext/nonincremental-search/.filter-return-fn)
-    (advice-remove 'nonincremental-re-search-backward #'vhl/ext/nonincremental-search/.filter-return-fn)
-    (advice-remove 'nonincremental-repeat-search-forward #'vhl/ext/nonincremental-search/.filter-return-fn)
-    (advice-remove 'nonincremental-repeat-search-backward #'vhl/ext/nonincremental-search/.filter-return-fn)))
+    (advice-remove 'nonincremental-search-forward
+                   #'vhl/ext/nonincremental-search/.filter-return-fn)
+    (advice-remove 'nonincremental-search-backward
+                   #'vhl/ext/nonincremental-search/.filter-return-fn)
+    (advice-remove 'nonincremental-re-search-forward
+                   #'vhl/ext/nonincremental-search/.filter-return-fn)
+    (advice-remove 'nonincremental-re-search-backward
+                   #'vhl/ext/nonincremental-search/.filter-return-fn)
+    (advice-remove 'nonincremental-repeat-search-forward
+                   #'vhl/ext/nonincremental-search/.filter-return-fn)
+    (advice-remove 'nonincremental-repeat-search-backward
+                   #'vhl/ext/nonincremental-search/.filter-return-fn)))
 
 (vhl/install-extension 'nonincremental-search)
 
@@ -1135,6 +1155,9 @@ Returns a list of (beg . end), or nil if not found."
 ;;-----------------------------------------------------------------------------
 
 (defun vhl/ext/hideshow/vhl/around-hook-fn (orig-fn &rest args)
+  "Around advice for hideshow to highlight the revealed block.
+
+ORIG-FN is the original function, ARGS are its arguments."
   (let* ((bol (save-excursion (progn (beginning-of-line) (point))))
          (eol (save-excursion (progn (end-of-line) (point))))
          (ov-folded (car (delq nil
@@ -1153,6 +1176,7 @@ Returns a list of (beg . end), or nil if not found."
     retval))
 
 (defun vhl/ext/hideshow/.activate ()
+  "Activate volatile highlighting for `hideshow' reveal."
   (advice-add 'hs-show-block :around #'vhl/ext/hideshow/vhl/around-hook-fn))
 
 (defun vhl/ext/hideshow/on ()
@@ -1166,6 +1190,7 @@ Returns a list of (beg . end), or nil if not found."
     (eval-after-load "hideshow" '(vhl/ext/hideshow/.activate)))))
 
 (defun vhl/ext/hideshow/off ()
+  "Turn off volatile highlighting for `hideshow'."
   (advice-remove 'hs-show-block #'vhl/ext/hideshow/vhl/around-hook-fn))
 
 (vhl/install-extension 'hideshow)
