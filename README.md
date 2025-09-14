@@ -1,12 +1,14 @@
-# volatile-highlights.el - Minor mode for visual feedback on some operations.
+# volatile-highlights.el - Transient visual feedback for edits
+
+[![MELPA](https://melpa.org/packages/volatile-highlights-badge.svg)](https://melpa.org/#/volatile-highlights) [![MELPA Stable](https://stable.melpa.org/packages/volatile-highlights-badge.svg)](https://stable.melpa.org/#/volatile-highlights) [![License: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Emacs](https://img.shields.io/badge/Emacs-24.4%2B-blue.svg)](https://www.gnu.org/software/emacs/)
 
 ## Overview
 
-This library provides the minor mode `volatile-highlights-mode`, which gives visual feedback for some operations by temporarily highlighting the relevant text.
+This library provides the global minor mode `volatile-highlights-mode`, which gives
+transient visual feedback for common editing operations. After an operation completes,
+the affected text is briefly highlighted and cleared on the next user command.
 
-For example, when you `yank` (paste) text, the newly inserted text will be highlighted for a moment. When you `undo`, the undone text will be highlighted. This provides a clear, visual confirmation of what just happened.
-
-All highlights are "volatile" and will disappear on the next user action.
+For example, yanking highlights the inserted text, and undo highlights the restored text.
 
 For integration with other packages and developer-oriented examples, see the Extending Guide: [docs/extending.md](docs/extending.md).
 
