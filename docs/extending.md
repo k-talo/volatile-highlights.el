@@ -121,6 +121,9 @@ Yasnippet: highlight the expanded snippet region after exiting a snippet.
 Define on/off functions that add/remove your advice, then install a VHL
 extension to automatically wire a Customize option and minor-mode lifecycle.
 
+This ensures highlight-related work does not run while the minor mode is off,
+and seamlessly reactivates when the mode is turned back on.
+
 ```emacs-lisp
 (defun vhl/ext/bookmark/.after-jump (&rest _)
   (vhl/add-range (line-beginning-position) (line-end-position)))
