@@ -140,7 +140,7 @@ and seamlessly reactivates when the mode is turned back on.
 
 
 Tips:
-- To mark deletion points as 1-character highlights, enable `Vhl/highlight-zero-width-ranges`.
+- To mark deletion points as 1-character highlights, enable `vhl/highlight-zero-width-ranges`.
 - To explicitly mark a single position, use `vhl/add-position`.
 
 ## For Developers
@@ -195,7 +195,7 @@ Examples
 ```
 
 Tips
-- Prefer `vhl/add-position` for deletion points; enable `Vhl/highlight-zero-width-ranges` to make them visible.
+- Prefer `vhl/add-position` for deletion points; enable `vhl/highlight-zero-width-ranges` to make them visible.
 - Keep heavy computations (bounds, scanning) inside the guard so they are skipped when the mode is off.
 
 Optional (rare): first-class extension
@@ -224,7 +224,7 @@ session-only toggle.
     No-op when `volatile-highlights-mode` is disabled.
   - `BUF` defaults to the current buffer, `FACE` defaults to `vhl/default-face`.
 - `(vhl/add-position POS &rest ARGS)`
-  - Mark a single position as a 1-character highlight when `Vhl/highlight-zero-width-ranges` is non-nil.
+  - Mark a single position as a 1-character highlight when `vhl/highlight-zero-width-ranges` is non-nil.
     No-op when `volatile-highlights-mode` is disabled.
 - `(vhl/clear-all)`
   - Clear all VHL highlights (normally done automatically on next command).

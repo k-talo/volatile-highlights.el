@@ -75,7 +75,7 @@ This interface allows you to:
     - `'static`: static highlight (default)
     - `'fade-in`: fade in, then stay until next command
     - `'pulse`: pulse (fade-out), then clear automatically
--   Highlight zero-width ranges (`Vhl/highlight-zero-width-ranges`, default: disabled): also mark deletion points as a 1-character highlight.
+-   Highlight zero-width ranges (`vhl/highlight-zero-width-ranges`, default: disabled): also mark deletion points as a 1-character highlight.
 
 ### Example Customizations with `use-package`
 
@@ -89,7 +89,7 @@ Here are some examples of how you might configure the package in your `init.el`:
   ;; Animation: choose one of 'static, 'fade-in, or 'pulse
   (vhl/highlight-animation-style 'fade-in)
   ;; Also mark deletion points (zero-width ranges)
-  (Vhl/highlight-zero-width-ranges t)
+  (vhl/highlight-zero-width-ranges t)
   :config
   ;; You can also set variables directly
   (setq vhl/pulse-iterations 5))

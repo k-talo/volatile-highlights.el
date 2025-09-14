@@ -63,10 +63,10 @@
     (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0))))
 
 (ert-deftest vhl/test-add-position-respects-zero-width-flag ()
-  "vhl/add-position only highlights when Vhl/highlight-zero-width-ranges is non-nil."
+  "vhl/add-position only highlights when vhl/highlight-zero-width-ranges is non-nil."
   (with-temp-buffer
     (insert "xyz")
-    (let ((Vhl/highlight-zero-width-ranges nil)
+    (let ((vhl/highlight-zero-width-ranges nil)
           (volatile-highlights-mode nil))
       (volatile-highlights-mode 1)
       (unwind-protect
@@ -74,7 +74,7 @@
         (volatile-highlights-mode -1))
       (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))
     (vhl/clear-all)
-    (let ((Vhl/highlight-zero-width-ranges t)
+    (let ((vhl/highlight-zero-width-ranges t)
           (volatile-highlights-mode nil))
       (volatile-highlights-mode 1)
       (unwind-protect
@@ -141,7 +141,7 @@
   "vhl/add-position clamps when POS is beyond buffer size."
   (with-temp-buffer
     (insert "hi")
-    (let ((Vhl/highlight-zero-width-ranges t)
+    (let ((vhl/highlight-zero-width-ranges t)
           (volatile-highlights-mode nil))
       (volatile-highlights-mode 1)
       (unwind-protect
@@ -178,7 +178,7 @@
   (with-temp-buffer
     (insert "abc")
     (let ((volatile-highlights-mode nil)
-          (Vhl/highlight-zero-width-ranges t))
+          (vhl/highlight-zero-width-ranges t))
       (vhl/add-position 2)
       (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))))
 

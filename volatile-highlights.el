@@ -54,7 +54,7 @@
 ;;   - 'static  : No animation.
 ;;   - 'fade-in : Fade in, then keep highlight until next command.
 ;;   - 'pulse   : Fade out, then clear automatically.
-;; - Vhl/highlight-zero-width-ranges (default: nil): also mark deletion
+;; - vhl/highlight-zero-width-ranges (default: nil): also mark deletion
 ;;   points as a 1-character highlight.
 ;; - vhl/default-face: face used for highlights; adjust to match your theme.
 ;; Per-feature toggles are available via `vhl/use-<name>-extension-p'.
@@ -89,7 +89,7 @@
 ;;
 ;;      Default value is `0.02'.
 ;;
-;;    - `Vhl/highlight-zero-width-ranges'
+;;    - `vhl/highlight-zero-width-ranges'
 ;;      If `t', highlight the positions of zero-width ranges.
 ;;
 ;;      For example, if a deletion is highlighted, then the position
@@ -370,7 +370,10 @@ When set: nil -> \='static, -1 -> \='fade-in, other non-nil -> \='pulse."
   :type 'number
   :group 'volatile-highlights)
 
-(defcustom Vhl/highlight-zero-width-ranges nil
+(define-obsolete-variable-alias 'Vhl/highlight-zero-width-ranges
+  'vhl/highlight-zero-width-ranges "1.19")
+
+(defcustom vhl/highlight-zero-width-ranges nil
   "When non-nil, also mark deletion points as 1-character highlights.
 
 This is useful to indicate where text used to be after a delete/kill
@@ -418,10 +421,10 @@ Highlights are cleared on the next user command.  When
 (defun vhl/add-position (pos &rest other-args)
   "Mark buffer position POS as a 1-character highlight.
 
-Does nothing unless `Vhl/highlight-zero-width-ranges' is non-nil.
+Does nothing unless `vhl/highlight-zero-width-ranges' is non-nil.
 Optional argument OTHER-ARGS are the same as for `vhl/add-range'.  When
 `volatile-highlights-mode' is disabled, this function is a no-op."
-  (when (and Vhl/highlight-zero-width-ranges (not (zerop (buffer-size))))
+  (when (and vhl/highlight-zero-width-ranges (not (zerop (buffer-size))))
     (when (> pos (buffer-size))
         (setq pos (- pos 1)))
     (apply 'vhl/add-range pos (+ pos 1) other-args)))
@@ -736,7 +739,7 @@ it defaults to t."
   "Record a highlight for the change between BEG and END.
 
 If LEN-REMOVED is zero, highlight the inserted region; otherwise mark
-the deletion point (subject to `Vhl/highlight-zero-width-ranges')."
+the deletion point (subject to `vhl/highlight-zero-width-ranges')."
   (let ((insert-p (zerop len-removed)))
     (if insert-p
         ;; Highlight the insertion
