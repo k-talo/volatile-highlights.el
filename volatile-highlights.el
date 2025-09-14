@@ -596,54 +596,54 @@ otherwise reschedule."
 (defvar vhl/.installed-extensions nil
   "List of symbols naming installed volatile-highlights extensions.")
 
-(defun vhl/install-extension (sym &optional disabled-by-default-p)
-  "Install extension SYM and define its user option.
+(defun vhl/install-extension (name &optional disabled-by-default-p)
+  "Install extension NAME and define its user option.
 
-Define the customizable variable `vhl/use-SYM-extension-p' (where SYM
-is the extension name) which toggles tracking for SYM.  If
-DISABLED-BY-DEFAULT-P is non-nil, the option defaults to nil;
-otherwise it defaults to t."
-  (let ((_fn-on  (intern (format "vhl/ext/%s/on" sym)))
-        (_fn-off (intern (format "vhl/ext/%s/off" sym)))
-        (cust-name (intern (format "vhl/use-%s-extension-p" sym))))
-    (cl-pushnew sym vhl/.installed-extensions)
+Define the customizable variable `vhl/use-NAME-extension-p' (where
+NAME is the extension name) which toggles tracking for NAME.  If
+DISABLED-BY-DEFAULT-P is non-nil, the option defaults to nil; otherwise
+it defaults to t."
+  (let ((_fn-on  (intern (format "vhl/ext/%s/on" name)))
+        (_fn-off (intern (format "vhl/ext/%s/off" name)))
+        (cust-name (intern (format "vhl/use-%s-extension-p" name))))
+    (cl-pushnew name vhl/.installed-extensions)
     (eval `(defcustom ,cust-name ,(not disabled-by-default-p)
-             ,(format "A flag if highlighting support for `%s' is on or not." sym)
+             ,(format "A flag if highlighting support for `%s' is on or not." name)
              :type 'boolean
              :group 'volatile-highlights
              :set (lambda (sym-to-set val)
                     (set-default sym-to-set val)
                     (if val
                         (when volatile-highlights-mode
-                          (vhl/load-extension (quote ,sym)))
-                      (vhl/unload-extension (quote ,sym))))))))
+                          (vhl/load-extension (quote ,name)))
+                      (vhl/unload-extension (quote ,name))))))))
 
-(defun vhl/load-extension (sym)
-  "Load and activate extension SYM when its user option is enabled."
-  (let ((fn-on  (intern (format "vhl/ext/%s/on" sym)))
-        (cust-name (intern (format "vhl/use-%s-extension-p" sym))))
+(defun vhl/load-extension (name)
+  "Load and activate extension NAME when its user option is enabled."
+  (let ((fn-on  (intern (format "vhl/ext/%s/on" name)))
+        (cust-name (intern (format "vhl/use-%s-extension-p" name))))
     (if (functionp fn-on)
         (when (and (boundp cust-name)
                    (eval cust-name))
           (apply fn-on nil))
-      (message "[vhl] No load function for extension  `%s'" sym))))
+      (message "[vhl] No load function for extension  `%s'" name))))
 
-(defun vhl/unload-extension (sym)
-  "Deactivate and unload extension SYM if available."
-  (let ((fn-off (intern (format "vhl/ext/%s/off" sym))))
+(defun vhl/unload-extension (name)
+  "Deactivate and unload extension NAME if available."
+  (let ((fn-off (intern (format "vhl/ext/%s/off" name))))
     (if (functionp fn-off)
         (apply fn-off nil)
-      (message "[vhl] No unload function for extension  `%s'" sym))))
+      (message "[vhl] No unload function for extension  `%s'" name))))
 
 (defun vhl/load-extensions ()
   "Load all installed volatile-highlights extensions."
-  (dolist (sym vhl/.installed-extensions)
-    (vhl/load-extension sym)))
+  (dolist (name vhl/.installed-extensions)
+    (vhl/load-extension name)))
 
 (defun vhl/unload-extensions ()
   "Unload all installed volatile-highlights extensions."
-  (dolist (sym vhl/.installed-extensions)
-    (vhl/unload-extension sym)))
+  (dolist (name vhl/.installed-extensions)
+    (vhl/unload-extension name)))
 
 
 ;;;============================================================================
