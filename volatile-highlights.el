@@ -1,4 +1,4 @@
-;;; volatile-highlights.el --- Transient visual feedback for edits. -*- lexical-binding: t; -*-
+;;; volatile-highlights.el --- Transient visual feedback for edits -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2001, 2010-2016, 2024-2025 K-talo Miyazaki
 
@@ -245,10 +245,6 @@
 ;;;
 ;;;============================================================================
 
-(eval-and-compile
-  (defconst vhl/.xemacsp (string-match "XEmacs" emacs-version)
-    "A flag if the emacs is xemacs or not."))
-
 (defvar vhl/.hl-lst nil
   "List of volatile highlights.")
 
@@ -276,22 +272,17 @@
   (assq :inherit custom-face-attributes))
 
 (defface vhl/default-face
-  (cond
-   ((or vhl/.xemacsp
-        (not (vhl/.face-inheritance-possible-p)))
+  (if (vhl/.face-inheritance-possible-p)
+      '((t :inherit secondary-selection))
     '((((class color) (background light))
        (:background "yellow1"))
       (((class color) (background dark))
        (:background "SkyBlue4"))
       (t :inverse-video t)))
-   (t
-    '((t
-       :inherit secondary-selection
-       ))))
-    "Face used for volatile highlights.
+  "Face used for volatile highlights.
 
 Adjust this face to match your theme for clear, unobtrusive feedback."
-    :group 'volatile-highlights)
+  :group 'volatile-highlights)
 
 
 ;;;============================================================================
@@ -455,56 +446,31 @@ Optional argument OTHER-ARGS are the same as for `vhl/add-range'.  When
 ;;-----------------------------------------------------------------------------
 (defun vhl/.make-hl (beg end buf face)
   "Create and return a highlight overlay from BEG to END in BUF using FACE."
-  (let (hl)
-	(cond
-	 (vhl/.xemacsp
-	  ;; XEmacs
-	  (setq hl (make-extent beg end buf))
-	  (set-extent-face hl face)
-	  (highlight-extent hl t)
-	  (set-extent-property hl 'volatile-highlights t))
-	 (t
-	  ;; GNU Emacs
-	  (setq hl (make-overlay beg end buf))
-	  (overlay-put hl 'face face)
-	  (overlay-put hl 'priority 1)
-	  (overlay-put hl 'volatile-highlights t)))
-	 hl))
+  (let ((hl (make-overlay beg end buf)))
+    (overlay-put hl 'face face)
+    (overlay-put hl 'priority 1)
+    (overlay-put hl 'volatile-highlights t)
+    hl))
 
 ;;-----------------------------------------------------------------------------
 ;; (vhl/.clear-hl HIGHLIGHT) => VOID
 ;;-----------------------------------------------------------------------------
 (defun vhl/.clear-hl (hl)
   "Clear one highlight overlay HL."
-  (cond
-   ;; XEmacs (not tested!)
-   (vhl/.xemacsp
-	(and (extentp hl)
-		 (delete-extent hl)))
-   ;; GNU Emacs
-   (t
-	(and (overlayp hl)
-		 (delete-overlay hl)))))
+  (when (overlayp hl)
+    (delete-overlay hl)))
 
 ;;-----------------------------------------------------------------------------
 ;; (vhl/.force-clear-all-hl) => VOID
 ;;-----------------------------------------------------------------------------
 (defun vhl/.force-clear-all-hl ()
   "Unconditionally clear all volatile highlight overlays in the current buffer."
-  (cond
-   ;; XEmacs (not tested!)
-   (vhl/.xemacsp
-      (map-extents (lambda (hl _maparg)
-                     (and (extent-property hl 'volatile-highlights)
-						  (vhl/.clear-hl hl)))))
-   ;; GNU Emacs
-   (t
-	(save-restriction
-	  (widen)
-	  (mapcar (lambda (hl)
-				(and (overlay-get hl 'volatile-highlights)
-					 (vhl/.clear-hl hl)))
-			  (overlays-in (point-min) (point-max)))))))
+  (save-restriction
+    (widen)
+    (mapcar (lambda (hl)
+              (and (overlay-get hl 'volatile-highlights)
+                   (vhl/.clear-hl hl)))
+            (overlays-in (point-min) (point-max)))))
 
 
 ;;;============================================================================
@@ -1183,11 +1149,9 @@ ORIG-FN is the original function, ARGS are its arguments."
   "Turn on volatile highlighting for `hideshow'."
   (interactive)
 
-  (cond
-   ((featurep 'hideshow)
-    (vhl/ext/hideshow/.activate))
-   (t
-    (eval-after-load "hideshow" '(vhl/ext/hideshow/.activate)))))
+  ;; Attach advice now; it will take effect even if `hs-show-block'
+  ;; is defined later.
+  (vhl/ext/hideshow/.activate))
 
 (defun vhl/ext/hideshow/off ()
   "Turn off volatile highlighting for `hideshow'."
@@ -1198,7 +1162,7 @@ ORIG-FN is the original function, ARGS are its arguments."
 
 ;;;============================================================================
 ;;;
-;;;  Suppress compiler warnings regarding to emacs/xemacs private functions.
+;;;  Suppress compiler warnings regarding to emacs private functions.
 ;;;
 ;;;============================================================================
 
