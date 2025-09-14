@@ -6,7 +6,7 @@
 ;; Maintainer: K-talo Miyazaki <Keitaro dot Miyazaki at gmail dot com>
 ;; Created: 03 October 2001. (as utility functions in my `.emacs' file.)
 ;;          14 March   2010. (re-written as library `volatile-highlights.el')
-;; Keywords: emulations convenience wp
+;; Keywords: editing emulations convenience wp
 ;; URL: https://github.com/k-talo/volatile-highlights.el
 ;; Package-Requires: ((emacs "24.4"))
 ;; Version: 1.18
@@ -230,13 +230,10 @@
 
 (eval-when-compile
   (require 'cl-lib)
-  (require 'easy-mmode)
   (require 'advice))
 (require 'cl-lib)
 (require 'color)
 (require 'thingatpt)
-
-(provide 'volatile-highlights)
 
 
 ;;;============================================================================
@@ -261,6 +258,7 @@
 ;;;
 ;;;============================================================================
 
+;;;###autoload
 (defgroup volatile-highlights nil
   "Visual feedback on operations."
   :group 'editing)
@@ -271,6 +269,7 @@
   "Return non-nil if the :inherit face attribute is supported."
   (assq :inherit custom-face-attributes))
 
+;;;###autoload
 (defface vhl/default-face
   (if (vhl/.face-inheritance-possible-p)
       '((t :inherit secondary-selection))
@@ -291,24 +290,13 @@ Adjust this face to match your theme for clear, unobtrusive feedback."
 ;;;
 ;;;============================================================================
 ;;;###autoload
-(defun volatile-highlights-mode (&optional _arg1)
-  ;; Dummy for autoloading; the real mode is defined below.
-  "Global minor mode for transient visual feedback on common operations.")
-
-(eval-and-compile
-  ;; 'easy-mmode-define-minor-mode' is obsoleted alias (as of 30.1)
-  (if (<= 30 emacs-major-version)
-      (defalias 'vhl/define-minor-mode 'define-minor-mode)
-    (defalias 'vhl/define-minor-mode 'easy-mmode-define-minor-mode)))
-
-(vhl/define-minor-mode
- volatile-highlights-mode
+(define-minor-mode volatile-highlights-mode
  "Global minor mode for transient visual feedback on common operations.
 
 When enabled, operations such as undo, yank, kill/delete,
 definition jumps (xref on Emacs 25.1+, `find-tag' on older Emacs),
 occur (on Emacs < 28), non-incremental search, and hideshow will
-briefly highlight the affected text. Highlights are cleared on the
+briefly highlight the affected text.  Highlights are cleared on the
 next user command.
 
 Customize the group `volatile-highlights' for per-feature toggles
@@ -369,6 +357,7 @@ operation.  The helper `vhl/add-position' respects this setting."
 ;;-----------------------------------------------------------------------------
 ;; (vhl/add-range BEG END &OPTIONAL BUF FACE) => VOID
 ;;-----------------------------------------------------------------------------
+;;;###autoload
 (defun vhl/add-range (beg end &optional buf face)
   "Add a transient highlight for the region [BEG, END) in buffer BUF.
 
@@ -402,6 +391,7 @@ Highlights are cleared on the next user command.  When
 ;;-----------------------------------------------------------------------------
 ;; (vhl/add-position POS &OPTIONAL BUF FACE) => VOID
 ;;-----------------------------------------------------------------------------
+;;;###autoload
 (defun vhl/add-position (pos &rest other-args)
   "Mark buffer position POS as a 1-character highlight.
 
@@ -416,6 +406,7 @@ Optional argument OTHER-ARGS are the same as for `vhl/add-range'.  When
 ;;-----------------------------------------------------------------------------
 ;; (vhl/clear-all) => VOID
 ;;-----------------------------------------------------------------------------
+;;;###autoload
 (defun vhl/clear-all ()
   "Clear all volatile highlight overlays."
   (interactive)
@@ -429,6 +420,7 @@ Optional argument OTHER-ARGS are the same as for `vhl/add-range'.  When
 ;;-----------------------------------------------------------------------------
 ;; (vhl/force-clear-all) => VOID
 ;;-----------------------------------------------------------------------------
+;;;###autoload
 (defun vhl/force-clear-all ()
   "Unconditionally clear all volatile highlight overlays in the current buffer."
   (interactive)
@@ -563,7 +555,8 @@ future highlights start from the face's original background."
   "Advance the pulse: step each scheduled face along its gradient.
 
 On each tick, update background colors using the precomputed gradient.
-If no colors remain, clear highlights and reset the internal timer/state; otherwise reschedule."
+If no colors remain, clear highlights and reset the internal timer/state;
+otherwise reschedule."
   (let (has-pending-gradient-colors-p)
     (dolist (face vhl/pulse/.faces-to-pulse-lst)
       (vhl/pulse/.prepare-for-face face)
@@ -716,10 +709,12 @@ volatile highlights."
            (unwind-protect (setq ,g-orig-ret (apply ,g-orig-fn ,g-args))
              (vhl/\.pop-from-after-change-hook (quote ,fn-name)))
            ,g-orig-ret))
-       (advice-add  (quote ,fn-name) :around (function ,ad-name)))))
+       (advice-add (quote ,fn-name) :around (quote ,ad-name)))))
 
 (defmacro vhl/cancel-advice-to-make-vhl-on-changes (fn-name)
-  "Remove the around-advice installed for FN-NAME by `vhl/give-advice-to-make-vhl-on-changes'."
+  "Remove the around-advice installed for FN-NAME.
+
+The advice was installed by `vhl/give-advice-to-make-vhl-on-changes'."
   (let ((ad-name (intern (concat "vhl/.advice-callback-fn/.make-vhl-on-"
                                   (format "%s" fn-name)))))
     `(advice-remove (quote ,fn-name) (quote ,ad-name))))
@@ -1159,15 +1154,8 @@ ORIG-FN is the original function, ARGS are its arguments."
 
 (vhl/install-extension 'hideshow)
 
-
-;;;============================================================================
-;;;
-;;;  Suppress compiler warnings regarding to emacs private functions.
-;;;
-;;;============================================================================
 
-;; Local variables:
-;; byte-compile-warnings: (not unresolved redefine)
-;; End:
+;; Provide feature after successful load.
+(provide 'volatile-highlights)
 
 ;;; volatile-highlights.el ends here
