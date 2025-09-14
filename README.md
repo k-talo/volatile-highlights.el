@@ -71,7 +71,10 @@ To customize the behavior and appearance of the highlights, you can use the cust
 This interface allows you to:
 -   Toggle highlighting for specific commands (e.g., turn off for `yank` but keep for `undo`).
 -   Change the highlight color by customizing the `vhl/default-face`.
--   Enable or disable the "pulsing" effect (`vhl/use-pulsing-visual-effect-p`, default: disabled).
+-   Choose animation mode via `vhl/highlight-animation-style`:
+    - `'static`: static highlight (default)
+    - `'fade-in`: fade in, then stay until next command
+    - `'pulse`: pulse (fade-out), then clear automatically
 -   Highlight zero-width ranges (`Vhl/highlight-zero-width-ranges`, default: disabled): also mark deletion points as a 1-character highlight.
 
 ### Example Customizations with `use-package`
@@ -83,8 +86,8 @@ Here are some examples of how you might configure the package in your `init.el`:
   :ensure t
   :hook (after-init . volatile-highlights-mode)
   :custom
-  ;; Use a pulsing effect instead of a static highlight
-  (vhl/use-pulsing-visual-effect-p t)
+  ;; Animation: choose one of 'static, 'fade-in, or 'pulse
+  (vhl/highlight-animation-style 'fade-in)
   ;; Also mark deletion points (zero-width ranges)
   (Vhl/highlight-zero-width-ranges t)
   :config
@@ -107,8 +110,8 @@ Keep static (non-pulsing) highlights, including for xref jumps:
   :ensure t
   :hook (after-init . volatile-highlights-mode)
   :custom
-  ;; Keep static (non-pulsing) highlights (default)
-  (vhl/use-pulsing-visual-effect-p nil)
+  ;; Keep static (non-animated) highlights (default)
+  (vhl/highlight-animation-style 'static)
   ;; Ensure xref integration is on (definitions)
   (vhl/use-xref-extension-p t)
   :config
