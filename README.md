@@ -172,3 +172,11 @@ To integrate with `undo-tree`:
 
 - Temporary directory note (batch test on restricted environments):
   - `mkdir -p .tmp && TMPDIR=$PWD/.tmp emacs -Q --batch -L . -l volatile-highlights.el -l test-volatile-highlights.el -f ert-run-tests-batch-and-exit`
+
+- Lint (checkdoc and package-lint):
+  - Makefile: `make checkdoc` (runs checkdoc on library .el files), `make package-lint` (runs package-lint on volatile-highlights.el), or `make lint` (both)
+  - package-lint must be installed (M-x package-install RET package-lint RET)
+  - If your package directory is customized, set `PKGDIR`:
+    - `make package-lint PKGDIR="$HOME/.emacs.d/elpa"`
+    - You can combine with a custom Emacs binary:
+      - `make package-lint EMACS="/Applications/Emacs.app/Contents/MacOS/Emacs" PKGDIR="$HOME/.emacs.d/elpa"`
