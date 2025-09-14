@@ -4,6 +4,8 @@
 
 ## Overview
 
+Highlights are volatile; they vanish on your next command.
+
 This library provides the global minor mode `volatile-highlights-mode`, which gives
 transient visual feedback for common editing operations. After an operation completes,
 the affected text is briefly highlighted and cleared on the next user command.
