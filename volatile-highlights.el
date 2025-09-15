@@ -287,7 +287,9 @@
       (t :inverse-video t)))
   "Face used for volatile highlights.
 
-Adjust this face to match your theme for clear, unobtrusive feedback."
+Adjust this face to match your theme for clear, unobtrusive feedback.
+For guidance on choosing or deriving colors from your theme, see the
+project docs: docs/appearance-and-tuning.md."
   :group 'volatile-highlights)
 
 
