@@ -43,8 +43,6 @@ test: $(TMPDIR)
 	  -l $(EL) $(foreach t,$(TESTS),-l $(t)) \
 	  -f ert-run-tests-batch-and-exit
 
-check: test
-
 checkdoc:
 	@for f in $(LIBS); do \
 	  echo "checkdoc $$f"; \
@@ -65,6 +63,8 @@ package-lint:
                         (kill-emacs 0)))"  $(EL)
 
 lint: checkdoc package-lint
+
+check: test lint
 
 clean:
 	rm -f $(ELC)
