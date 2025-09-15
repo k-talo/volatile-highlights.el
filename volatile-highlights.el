@@ -271,14 +271,9 @@
   :group 'editing)
 
 
-;; Borrowed from `slime.el'.
-(defun vhl/.face-inheritance-possible-p ()
-  "Return non-nil if the :inherit face attribute is supported."
-  (assq :inherit custom-face-attributes))
-
 ;;;###autoload
 (defface vhl/default-face
-  (if (vhl/.face-inheritance-possible-p)
+  (if (assq :inherit custom-face-attributes)
       '((t :inherit secondary-selection))
     '((((class color) (background light))
        (:background "yellow1"))
