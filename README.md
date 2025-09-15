@@ -201,3 +201,9 @@ To integrate with `undo-tree`:
     - `make package-lint PKGDIR="$HOME/.emacs.d/elpa"`
     - You can combine with a custom Emacs binary:
       - `make package-lint EMACS="/Applications/Emacs.app/Contents/MacOS/Emacs" PKGDIR="$HOME/.emacs.d/elpa"`
+
+## License
+
+GPLv3 or later. See the [LICENSE](LICENSE) file for the full text.
+
+Copyright (c) 2001, 2010-2016, 2024-2025 K-talo Miyazaki
