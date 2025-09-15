@@ -202,6 +202,12 @@ To integrate with `undo-tree`:
     - You can combine with a custom Emacs binary:
       - `make package-lint EMACS="/Applications/Emacs.app/Contents/MacOS/Emacs" PKGDIR="$HOME/.emacs.d/elpa"`
 
+## Reporting Issues
+
+Please open issues on the GitHub tracker:
+
+https://github.com/k-talo/volatile-highlights.el/issues
+
 ## License
 
 GPLv3 or later. See the [LICENSE](LICENSE) file for the full text.

@@ -2,8 +2,8 @@
 
 ;; Copyright (C) 2001, 2010-2016, 2024-2025 K-talo Miyazaki
 
-;; Author: K-talo Miyazaki <Keitaro dot Miyazaki at gmail dot com>
-;; Maintainer: K-talo Miyazaki <Keitaro dot Miyazaki at gmail dot com>
+;; Author: K-talo Miyazaki <Keitaro.Miyazaki@gmail.com>
+;; Maintainer: K-talo Miyazaki <Keitaro.Miyazaki@gmail.com>
 ;; Created: 03 October 2001. (as utility functions in my `.emacs' file.)
 ;;          14 March   2010. (re-written as library `volatile-highlights.el')
 ;; Keywords: editing emulations convenience wp
