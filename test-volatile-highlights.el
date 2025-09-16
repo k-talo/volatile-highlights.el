@@ -115,6 +115,30 @@ non-nil."
             (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))
         (volatile-highlights-mode -1)))))
 
+(ert-deftest vhl/test-replace-string-highlights ()
+  "replace-string highlights replacements made by \='perform-replace."
+  (with-temp-buffer
+    (let ((volatile-highlights-mode nil))
+      (insert "foo baz foo")
+      (goto-char (point-min))
+      (volatile-highlights-mode 1)
+      (unwind-protect
+          (progn
+            (vhl/test--silence
+             (replace-string "foo" "bar"))
+            (let* ((ovs (vhl/test--vhl-overlays (point-min) (point-max)))
+                   (texts (mapcar (lambda (ov)
+                                    (buffer-substring-no-properties
+                                     (overlay-start ov)
+                                     (overlay-end ov)))
+                                  ovs)))
+              (should (= (length ovs) 2))
+              (should (cl-every (lambda (text) (string= text "bar")) texts)))
+            ;; Simulate next command to clear highlights
+            (run-hooks 'pre-command-hook)
+            (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))
+        (volatile-highlights-mode -1)))))
+
 (ert-deftest vhl/test-undo-highlights ()
   "undo highlights affected text."
   (with-temp-buffer

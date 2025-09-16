@@ -54,6 +54,7 @@ When `volatile-highlights-mode` is active, the following operations will be high
 -   **`undo`:** Highlights the text affected by the undo operation.
 -   **`yank` and `yank-pop`:** Highlights the newly pasted text.
 -   **Killing commands (`kill-region`, `kill-line`, etc.):** Highlights the region where text was cut.
+-   **Replacements (`query-replace`, `replace-string`, etc.):** Highlights the inserted text for each replacement.
 -   **Definitions (`xref` on Emacs 25.1+, `find-tag` on older Emacs):** Highlights the destination at point.
 -   **`occur` (Emacs < 28):** Highlights the selected occurrence when jumping from an `*Occur*` buffer.
     On Emacs 28 and newer, `occur` already provides built-in highlighting, so the vhl extension is not used.

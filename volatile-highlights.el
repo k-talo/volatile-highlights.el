@@ -40,6 +40,7 @@
 ;; - undo: highlight the text restored by undo
 ;; - yank and yank-pop: highlight inserted text
 ;; - kill/delete: show where text used to be (optionally as a point)
+;; - replacements: highlight results of `query-replace' and `replace-string'
 ;; - definitions: Emacs 25.1+ uses xref; older Emacs use find-tag
 ;; - occur: Emacs < 28 only (Emacs 28+ has built-in occur highlighting)
 ;; - non-incremental search commands
@@ -775,16 +776,23 @@ it defaults to t."
                  'vhl/.make-vhl-on-change)))
 
 (defun vhl/.make-vhl-on-change (beg end len-removed)
-  "Record a highlight for the change between BEG and END.
+"Record a highlight for the change between BEG and END.
 
-If LEN-REMOVED is zero, highlight the inserted region; otherwise mark
-the deletion point (subject to `vhl/highlight-zero-width-ranges')."
-  (let ((insert-p (zerop len-removed)))
-    (if insert-p
-        ;; Highlight the insertion
-        (vhl/add-range beg end)
-      ;; Highlight the position of the deletion
-      (vhl/add-position beg))))
+Highlight inserted text whenever the modified region has positive
+width (END greater than BEG).  For pure deletions, where LEN-REMOVED
+reports removed characters but END equals BEG, fall back to marking
+the deletion point, subject to `vhl/highlight-zero-width-ranges'.  No
+highlight is created when neither condition applies (for example,
+notifications for text-property-only changes)."
+  (let ((has-insert (> end beg))
+        (has-delete (not (zerop len-removed))))
+    (cond
+     (has-insert
+      ;; Highlight the newly inserted or replaced text.
+      (vhl/add-range beg end))
+     (has-delete
+      ;; Pure deletion: optionally mark the point of removal.
+      (vhl/add-position beg)))))
 
 (defmacro vhl/give-advice-to-make-vhl-on-changes (fn-name)
   "Generate around-advice to track buffer modifications in FN-NAME.
@@ -940,6 +948,17 @@ for NAME."
 
 (vhl/define-extension 'delete 'delete-region)
 (vhl/install-extension 'delete)
+
+
+;;-----------------------------------------------------------------------------
+;; Extension for supporting query-replace and related commands.
+;;   -- Put volatile highlights on replacements done via `perform-replace'.
+;;      Covers `query-replace', `query-replace-regexp', `replace-string',
+;;      and friends.
+;;-----------------------------------------------------------------------------
+
+(vhl/define-extension 'query-replace 'perform-replace)
+(vhl/install-extension 'query-replace)
 
 
 ;;-----------------------------------------------------------------------------
