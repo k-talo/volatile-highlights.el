@@ -356,11 +356,12 @@ When set: nil -> \='static, -1 -> \='fade-in, other non-nil -> \='pulse."
 
 ;; If users set the old variable in init before loading this library,
 ;; map its value into the new style on load.
-(when (boundp 'vhl/use-pulsing-visual-effect-p)
+(when (and (boundp 'vhl/use-pulsing-visual-effect-p)
+           vhl/use-pulsing-visual-effect-p)
+  (message "[vhl] `vhl/use-pulsing-visual-effect-p' is obsolete; use `vhl/animation-style' instead.")
   (let ((val vhl/use-pulsing-visual-effect-p))
     (setq vhl/animation-style
-          (cond ((null val) 'static)
-                ((and (numberp val) (= val -1)) 'fade-in)
+          (cond ((and (numberp val) (= val -1)) 'fade-in)
                 (t 'pulse)))))
 
 
