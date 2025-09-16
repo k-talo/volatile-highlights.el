@@ -12,12 +12,14 @@
 (require 'volatile-highlights)
 
 (defun vhl/test--count-vhl-overlays (beg end)
-  "Return count of overlays with property \='volatile-highlights between BEG and END."
+  "Return count of overlays with property \='volatile-highlights between
+BEG and END."
   (cl-count-if (lambda (ov) (overlay-get ov 'volatile-highlights))
                (overlays-in beg end)))
 
 (defun vhl/test--vhl-overlays (beg end)
-  "Return list of overlays with property \='volatile-highlights between BEG and END."
+  "Return list of overlays with property \='volatile-highlights between
+BEG and END."
   (cl-remove-if-not (lambda (ov) (overlay-get ov 'volatile-highlights))
                     (overlays-in beg end)))
 
@@ -63,7 +65,8 @@
     (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0))))
 
 (ert-deftest vhl/test-add-position-respects-zero-width-flag ()
-  "vhl/add-position only highlights when vhl/highlight-zero-width-ranges is non-nil."
+  "vhl/add-position only highlights when vhl/highlight-zero-width-ranges is
+non-nil."
   (with-temp-buffer
     (insert "xyz")
     (let ((vhl/highlight-zero-width-ranges nil)
