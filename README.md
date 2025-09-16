@@ -41,10 +41,11 @@ A more structured way to configure it, especially if you use the popular [`use-p
 ```emacs-lisp
 (use-package volatile-highlights
   :ensure t
-  :hook (after-init . volatile-highlights-mode))
+  :config
+  (volatile-highlights-mode 1))
 ```
 
-This ensures the package is installed and enables the mode when Emacs starts.
+This ensures the package is installed and enables the mode after it is loaded.
 
 ## Features
 
@@ -84,13 +85,13 @@ Here are some examples of how you might configure the package in your `init.el`:
 ```emacs-lisp
 (use-package volatile-highlights
   :ensure t
-  :hook (after-init . volatile-highlights-mode)
   :custom
   ;; Animation: choose one of 'static, 'fade-in, or 'pulse
   (vhl/animation-style 'fade-in)
   ;; Also mark deletion points (zero-width ranges)
   (vhl/highlight-zero-width-ranges t)
   :config
+  (volatile-highlights-mode 1)
   ;; Prefer customize-set-variable (or setopt on Emacs 29.1+) so :set hooks run
   (customize-set-variable 'vhl/animation-iterations 6)
   (customize-set-variable 'vhl/animation-iteration-delay 0.03)
@@ -113,13 +114,13 @@ Keep static (non-pulsing) highlights, including for xref jumps:
 ```emacs-lisp
 (use-package volatile-highlights
   :ensure t
-  :hook (after-init . volatile-highlights-mode)
   :custom
   ;; Keep static (non-animated) highlights (default)
   (vhl/animation-style 'static)
   ;; Ensure xref integration is on (definitions)
   (vhl/use-xref-extension-p t)
   :config
+  (volatile-highlights-mode 1)
   (with-eval-after-load 'xref
     ;; Disable the built-in xref pulse to keep static highlights.
     ;; Use customize-set-variable (or setopt on Emacs 29.1+).
@@ -155,8 +156,8 @@ To make `evil-mode`'s pasting commands trigger highlights, a robust `use-package
 ```emacs-lisp
 (use-package volatile-highlights
   :ensure t
-  :hook (after-init . volatile-highlights-mode)
   :config
+  (volatile-highlights-mode 1)
   (with-eval-after-load 'evil
     (vhl/define-extension 'evil 'evil-paste-after 'evil-paste-before
                           'evil-paste-pop)
@@ -170,8 +171,8 @@ To integrate with `undo-tree`:
 ```emacs-lisp
 (use-package volatile-highlights
   :ensure t
-  :hook (after-init . volatile-highlights-mode)
   :config
+  (volatile-highlights-mode 1)
   (with-eval-after-load 'undo-tree
     (vhl/define-extension 'undo-tree 'undo-tree-yank)
     (vhl/install-extension 'undo-tree)))

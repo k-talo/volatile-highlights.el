@@ -17,8 +17,8 @@ It includes:
 ```emacs-lisp
 (use-package volatile-highlights
   :ensure t
-  :hook (after-init . volatile-highlights-mode)
   :config
+  (volatile-highlights-mode 1)
   (with-eval-after-load 'some-pkg
     (vhl/define-extension 'some-pkg 'some-insert-cmd 'some-delete-cmd)
     (vhl/install-extension 'some-pkg)))
@@ -52,8 +52,8 @@ and `vhl/install-extension` enables it and connects it to a user option.
 ```emacs-lisp
 (use-package volatile-highlights
   :ensure t
-  :hook (after-init . volatile-highlights-mode)
   :config
+  (volatile-highlights-mode 1)
   (with-eval-after-load 'some-pkg
     ;; Replace with actual insert/delete commands from the package
     (vhl/define-extension 'some-pkg 'some-insert-cmd 'some-delete-cmd)
