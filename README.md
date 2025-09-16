@@ -71,7 +71,7 @@ To customize the behavior and appearance of the highlights, you can use the cust
 This interface allows you to:
 -   Toggle highlighting for specific commands (e.g., turn off for `yank` but keep for `undo`).
 -   Change the highlight color by customizing the `vhl/default-face`.
--   Choose animation mode via `vhl/highlight-animation-style`:
+-   Choose animation mode via `vhl/animation-style`:
     - `'static`: static highlight (default)
     - `'fade-in`: fade in, then stay until next command
     - `'pulse`: pulse (fade-out), then clear automatically
@@ -87,7 +87,7 @@ Here are some examples of how you might configure the package in your `init.el`:
   :hook (after-init . volatile-highlights-mode)
   :custom
   ;; Animation: choose one of 'static, 'fade-in, or 'pulse
-  (vhl/highlight-animation-style 'fade-in)
+  (vhl/animation-style 'fade-in)
   ;; Also mark deletion points (zero-width ranges)
   (vhl/highlight-zero-width-ranges t)
   :config
@@ -116,7 +116,7 @@ Keep static (non-pulsing) highlights, including for xref jumps:
   :hook (after-init . volatile-highlights-mode)
   :custom
   ;; Keep static (non-animated) highlights (default)
-  (vhl/highlight-animation-style 'static)
+  (vhl/animation-style 'static)
   ;; Ensure xref integration is on (definitions)
   (vhl/use-xref-extension-p t)
   :config
@@ -137,7 +137,7 @@ You can toggle vhl's xref integration with the customization flag `vhl/use-xref-
   - Face: Customize `vhl/default-face` to match your theme for clear highlights.
   - Large ranges: Static highlights can be easier to read than pulsing effects.
   - Avoid stacking: Do not layer multiple highlight systems for the same action (e.g., xref pulse + VHL) unless intentional.
-  - Animation: Choose style via `vhl/highlight-animation-style` and tune iterations/delays.
+  - Animation: Choose style via `vhl/animation-style` and tune iterations/delays.
 
 For detailed guidance (face choices, theme-derived recipes, animation styles,
 and tuning suggestions), see: [docs/appearance-and-tuning.md](docs/appearance-and-tuning.md)

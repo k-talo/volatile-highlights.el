@@ -60,7 +60,7 @@ Notes
 
 ## Animation Styles
 
-Choose animation via `vhl/highlight-animation-style`:
+Choose animation via `vhl/animation-style`:
 - `static`: no animation; lowest CPU and most responsive.
 - `fade-in`: gradually appear, then stay until the next command.
 - `pulse`: fade out, then clear automatically when the animation finishes.
@@ -89,4 +89,3 @@ Troubleshooting
   fall back to static; this is expected.
 - Avoid stacking multiple highlight systems for the same action (e.g., xref
   pulse plus VHL) unless you want the combined effect.
-

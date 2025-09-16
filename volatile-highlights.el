@@ -49,7 +49,7 @@
 ;; ------------
 ;; Customize the group `volatile-highlights' (M-x customize-group RET
 ;; volatile-highlights RET).
-;; - vhl/highlight-animation-style (default: 'static): animation style
+;; - vhl/animation-style (default: 'static): animation style
 ;;   for highlights.
 ;;   - 'static  : No animation.
 ;;   - 'fade-in : Fade in, then keep highlight until next command.
@@ -312,7 +312,7 @@ and appearance."
      (vhl/load-extensions)
    (vhl/unload-extensions)))
 
-(defcustom vhl/highlight-animation-style 'static
+(defcustom vhl/animation-style 'static
   "Animation style for volatile highlighting.
 
 Choose how highlights animate:
@@ -340,7 +340,7 @@ on the current frame, fall back to static behavior."
 ;; as a tri-state variable where nil=static, -1=fade-in, other non-nil=pulse.
 ;; Keep it as an obsolete interface that maps to the new style.
 (defcustom vhl/use-pulsing-visual-effect-p nil
-  "Obsolete.  Use `vhl/highlight-animation-style' instead.
+  "Obsolete.  Use `vhl/animation-style' instead.
 
 When set: nil -> \='static, -1 -> \='fade-in, other non-nil -> \='pulse."
   :group 'volatile-highlights
@@ -349,7 +349,7 @@ When set: nil -> \='static, -1 -> \='fade-in, other non-nil -> \='pulse."
                  (other :tag "Pulse (fade-out)" t))
   :set (lambda (sym val)
          (set-default sym val)
-         (setq vhl/highlight-animation-style
+         (setq vhl/animation-style
                (cond ((null val) 'static)
                      ((and (numberp val) (= val -1)) 'fade-in)
                      (t 'pulse)))))
@@ -358,10 +358,11 @@ When set: nil -> \='static, -1 -> \='fade-in, other non-nil -> \='pulse."
 ;; map its value into the new style on load.
 (when (boundp 'vhl/use-pulsing-visual-effect-p)
   (let ((val vhl/use-pulsing-visual-effect-p))
-    (setq vhl/highlight-animation-style
+    (setq vhl/animation-style
           (cond ((null val) 'static)
                 ((and (numberp val) (= val -1)) 'fade-in)
                 (t 'pulse)))))
+
 
 ;; Backward compatibility for renamed animation defcustoms.
 ;; Keep old `vhl/pulse-*' user options as obsolete aliases. Declare
@@ -597,13 +598,13 @@ highlights start from the face's original background."
 (defun vhl/pulse/.make-color-gradient (face)
   "Return a list of gradient colors for animating FACE.
 
-When `vhl/highlight-animation-style' is \='fade-in, generate a gradient
+When `vhl/animation-style' is \='fade-in, generate a gradient
 from the default background to the highlight color.  Otherwise generate
 the standard pulse (highlight color to default background)."
 
   ;; This part is taken from `pulse-momentary-highlight-overlay' in
   ;; `pulse.el' by Eric M. Ludlam.
-  (let* ((fade-in-p (eq vhl/highlight-animation-style 'fade-in))
+  (let* ((fade-in-p (eq vhl/animation-style 'fade-in))
          (hl-color (face-background face nil 'default))
          (bg-color (face-background 'default))
          (start (color-name-to-rgb (if fade-in-p bg-color hl-color)))
@@ -620,7 +621,7 @@ the standard pulse (highlight color to default background)."
 (defun vhl/pulse/.prepare-for-face (face)
   "Prepare FACE for animation by saving original background and gradient."
   (let ((use-anim-p (and (vhl/pulse/available-p)
-                         (not (eq vhl/highlight-animation-style 'static)))))
+                         (not (eq vhl/animation-style 'static)))))
     (when (and use-anim-p
                (facep face)
                ;; do nothing the face is already set up.
@@ -657,7 +658,7 @@ If no colors remain, then:
  - For pulse (fade-out), clear highlights and reset state.
  - For fade-in, stop the timer but keep the static highlights until
    the next user command clears them."
-  (let ((fade-in-p (eq vhl/highlight-animation-style 'fade-in))
+  (let ((fade-in-p (eq vhl/animation-style 'fade-in))
         has-pending-gradient-colors-p)
     (dolist (face vhl/pulse/.faces-to-pulse-lst)
       (let ((gradient-colors (get face 'vhl/pulse/gradient-bg-color-lst)))
