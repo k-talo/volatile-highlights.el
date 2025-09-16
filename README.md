@@ -47,7 +47,7 @@ A more structured way to configure it, especially if you use the popular [`use-p
 
 This ensures the package is installed and enables the mode after it is loaded.
 
-## Features
+## Highlighted Operations
 
 When `volatile-highlights-mode` is active, the following operations will be highlighted:
 
@@ -55,6 +55,7 @@ When `volatile-highlights-mode` is active, the following operations will be high
 -   **`yank` and `yank-pop`:** Highlights the newly pasted text.
 -   **Killing commands (`kill-region`, `kill-line`, etc.):** Highlights the region where text was cut.
 -   **Replacements (`query-replace`, `replace-string`, etc.):** Highlights the inserted text for each replacement.
+-   **Transposition commands (`transpose-chars`, `transpose-words`, `transpose-regions`, etc.):** Highlights the swapped text.
 -   **Definitions (`xref` on Emacs 25.1+, `find-tag` on older Emacs):** Highlights the destination at point.
 -   **`occur` (Emacs < 28):** Highlights the selected occurrence when jumping from an `*Occur*` buffer.
     On Emacs 28 and newer, `occur` already provides built-in highlighting, so the vhl extension is not used.

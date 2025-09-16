@@ -113,7 +113,7 @@ non-nil."
             ;; Simulate next command
             (run-hooks 'pre-command-hook)
             (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))
-        (volatile-highlights-mode -1)))))
+        (volatile-highlights-mode -1))))
 
 (ert-deftest vhl/test-replace-string-highlights ()
   "replace-string highlights replacements made by \='perform-replace."
@@ -135,6 +135,76 @@ non-nil."
               (should (= (length ovs) 2))
               (should (cl-every (lambda (text) (string= text "bar")) texts)))
             ;; Simulate next command to clear highlights
+            (run-hooks 'pre-command-hook)
+            (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))
+        (volatile-highlights-mode -1))))
+
+(ert-deftest vhl/test-transpose-chars-highlights ()
+  "transpose-chars highlights the swapped characters."
+  (with-temp-buffer
+    (let ((volatile-highlights-mode nil))
+      (insert "ab")
+      (goto-char 2) ;; between "a" and "b"
+      (volatile-highlights-mode 1)
+      (unwind-protect
+          (progn
+            (vhl/test--silence (transpose-chars 1))
+            (let ((ovs (vhl/test--vhl-overlays (point-min) (point-max))))
+              (should (> (length ovs) 0))
+              (let* ((beg (apply #'min (mapcar #'overlay-start ovs)))
+                     (end (apply #'max (mapcar #'overlay-end ovs))))
+                (should (= beg 1))
+                (should (= end 3))
+                (should (string= (buffer-substring-no-properties beg end)
+                                 "ba")))))
+            (run-hooks 'pre-command-hook)
+            (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))
+        (volatile-highlights-mode -1))))
+
+(ert-deftest vhl/test-transpose-words-highlights ()
+  "transpose-words highlights the swapped words."
+  (with-temp-buffer
+    (let ((volatile-highlights-mode nil))
+      (insert "foo bar")
+      (goto-char (point-min))
+      (volatile-highlights-mode 1)
+      (unwind-protect
+          (progn
+            (vhl/test--silence (transpose-words 1))
+            (let ((ovs (vhl/test--vhl-overlays (point-min) (point-max))))
+              (should (> (length ovs) 0))
+              (let* ((beg (apply #'min (mapcar #'overlay-start ovs)))
+                     (end (apply #'max (mapcar #'overlay-end ovs))))
+                (should (= beg (point-min)))
+                (should (= end (point-max)))
+                (should (string= (buffer-substring-no-properties beg end)
+                                 "bar foo")))))
+            (run-hooks 'pre-command-hook)
+            (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))
+        (volatile-highlights-mode -1)))))
+
+(ert-deftest vhl/test-transpose-regions-highlights ()
+  "transpose-regions highlights the swapped regions."
+  (with-temp-buffer
+    (let ((volatile-highlights-mode nil))
+      (insert "foo bar")
+      (volatile-highlights-mode 1)
+      (unwind-protect
+          (progn
+            (let* ((start1 (point-min))
+                   (end1 (+ start1 3))
+                   (start2 (+ end1 1))
+                   (end2 (+ start2 3)))
+              (vhl/test--silence
+               (transpose-regions start1 end1 start2 end2)))
+            (let ((ovs (vhl/test--vhl-overlays (point-min) (point-max))))
+              (should (> (length ovs) 0))
+              (let* ((beg (apply #'min (mapcar #'overlay-start ovs)))
+                     (end (apply #'max (mapcar #'overlay-end ovs))))
+                (should (= beg (point-min)))
+                (should (= end (point-max)))
+                (should (string= (buffer-substring-no-properties beg end)
+                                 "bar foo")))))
             (run-hooks 'pre-command-hook)
             (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))
         (volatile-highlights-mode -1)))))
