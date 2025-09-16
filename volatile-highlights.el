@@ -273,13 +273,7 @@
 
 ;;;###autoload
 (defface vhl/default-face
-  (if (assq :inherit custom-face-attributes)
-      '((t :inherit secondary-selection))
-    '((((class color) (background light))
-       (:background "yellow1"))
-      (((class color) (background dark))
-       (:background "SkyBlue4"))
-      (t :inverse-video t)))
+  '((t :inherit secondary-selection))
   "Face used for volatile highlights.
 
 Adjust this face to match your theme for clear, unobtrusive feedback.
