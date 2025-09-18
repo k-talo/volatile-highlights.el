@@ -91,10 +91,10 @@
 ;;
 ;;      Default value is `0.15'.
 ;;
-;;    - `vhl/animation-iteration-delay'
-;;      Delay between iterations of the highlight animation in seconds.
+;;    - `vhl/animation-frame-interval'
+;;      Delay between animation ticks in seconds.
 ;;
-;;      Default value is `0.02'.
+;;      Default value is `0.04'.
 ;;
 ;;    - `vhl/highlight-zero-width-ranges'
 ;;      If `t', highlight the positions of zero-width ranges.
@@ -366,18 +366,20 @@ When set: nil -> \='static, -1 -> \='fade-in, other non-nil -> \='pulse."
 ;; Keep old `vhl/pulse-*' user options as obsolete aliases. Declare
 ;; aliases before their referents to satisfy the byte-compiler.
 (define-obsolete-variable-alias 'vhl/pulse-iterations
-  'vhl/animation-iterations "1.19")
+  'vhl/animation-mid-frames "1.19")
 (define-obsolete-variable-alias 'vhl/pulse-start-delay
   'vhl/animation-start-delay "1.19")
 (define-obsolete-variable-alias 'vhl/pulse-iteration-delay
-  'vhl/animation-iteration-delay "1.19")
+  'vhl/animation-frame-interval "1.19")
 
-(defcustom vhl/animation-iterations 9
-  "Number of iterations for the highlight animation.
+(defcustom vhl/animation-mid-frames 9
+  "Number of internal frames between the start and end colors.
 
-Higher values are smoother but increase CPU cost.  Applies to both
-\='fade-in and \='pulse styles.  Typical values range from 6 to 12.
-Suggested starting points: \='fade-in: 6, \='pulse: 12."
+The animation always shows the start frame first and the end frame
+last; setting this value to 0 therefore yields just the start and stop
+colors.  Higher values are smoother but increase CPU cost.  Applies to
+both \='fade-in and \='pulse styles.  Typical values range from 4 to 10.
+Suggested starting points: \='fade-in: 4, \='pulse: 10."
   :type 'number
   :group 'volatile-highlights)
 
@@ -396,10 +398,23 @@ providing the best responsiveness.  A common sweet spot for
   :type 'number
   :group 'volatile-highlights)
 
-(defcustom vhl/animation-iteration-delay 0.04
-  "Delay between iterations of the highlight animation in seconds.
+(defcustom vhl/animation-prestart-opacity nil
+  "Opacity of the prestart hint shown before animated highlights.
 
-Lower values speed up the animation but may cost more CPU; higher
+Animated styles wait for Emacs to become idle, so rapid command
+sequences would otherwise only reveal the last highlight.  The
+prestart hint appears immediately while the full animation still runs
+later.  When nil, choose a style-appropriate default: 0.0 for \='fade-in
+and 1.0 for \='pulse.  Otherwise use a float between 0.0 (same as the
+default background) and 1.0 (fully opaque highlight color)."
+  :type '(choice (const :tag "Auto (style default)" nil)
+                 (number :tag "Opacity"))
+  :group 'volatile-highlights)
+
+(defcustom vhl/animation-frame-interval 0.04
+  "Delay between animation frame ticks in seconds.
+
+Lower values advance the animation faster but can cost more CPU; higher
 values slow it down.  Applies to both \='fade-in and \='pulse styles.
 Typical values range from 0.03 to 0.05.  Suggested starting points:
 \='fade-in: 0.03, \='pulse: 0.05."
@@ -574,7 +589,7 @@ highlights start from the face's original background."
     (when orig-bg-color
       (set-face-background face orig-bg-color)
       (put face 'vhl/pulse/orig-bg-color nil)
-      (put face 'vhl/pulse/start-bg-color nil)
+      (put face 'vhl/pulse/prestart-bg-color nil)
       (put face 'vhl/pulse/gradient-bg-color-lst nil))))
 
 
@@ -591,27 +606,53 @@ highlights start from the face's original background."
 ;; portions of which inspired and are adapted here.
 
 ;;-----------------------------------------------------------------------------
-;; (vhl/pulse/.make-color-gradient FACE) => LIST OF COLORS
+;; (vhl/pulse/.mix-rgb FROM TO AMOUNT) => LIST OF RGB COMPONENTS AS NUMBERS
+;;-----------------------------------------------------------------------------
+(defun vhl/pulse/.mix-rgb (from to amount)
+  "Linearly blend two RGB lists FROM and TO by AMOUNT (0.0-1.0)."
+  (cl-mapcar (lambda (from to)
+               (+ (* (- 1 amount) from) (* amount to)))
+             from to))
+
+;;-----------------------------------------------------------------------------
+;; (vhl/pulse/.make-color-gradient FACE) => LIST OF COLOR HEX STRINGS
 ;;-----------------------------------------------------------------------------
 (defun vhl/pulse/.make-color-gradient (face)
   "Return a list of gradient colors for animating FACE.
 
 When `vhl/animation-style' is \='fade-in, generate a gradient
 from the default background to the highlight color.  Otherwise generate
-the standard pulse (highlight color to default background)."
+the standard pulse (highlight color to default background).  The
+starting point is influenced by `vhl/animation-prestart-opacity'."
 
-  ;; This part is taken from `pulse-momentary-highlight-overlay' in
+  ;; This logic is adapted from `pulse-momentary-highlight-overlay' in
   ;; `pulse.el' by Eric M. Ludlam.
   (let* ((fade-in-p (eq vhl/animation-style 'fade-in))
-         (hl-color (face-background face nil 'default))
-         (bg-color (face-background 'default))
-         (start (color-name-to-rgb (if fade-in-p bg-color hl-color)))
-         (stop (color-name-to-rgb (if fade-in-p hl-color bg-color))))
+         (opacity (or (and (numberp vhl/animation-prestart-opacity)
+                           ;; Clamp the value between 0.0 and 1.0.
+                           (min 1.0 (max 0.0 vhl/animation-prestart-opacity)))
+                      ;; When the value is not a number, fall back to a
+                      ;; style-appropriate default.
+                      (if fade-in-p 0.0 1.0)))
+         (bg-name (face-background 'default))
+         (hl-name (or (face-background face nil 'default) bg-name))
+         (hl-rgb (color-name-to-rgb hl-name))
+         (bg-rgb (color-name-to-rgb bg-name))
+         (prestart-rgb (vhl/pulse/.mix-rgb bg-rgb hl-rgb opacity))
+         (start-rgb (if fade-in-p prestart-rgb hl-rgb))
+         (stop-rgb (if fade-in-p hl-rgb bg-rgb))
+         (mid-frames (if (numberp vhl/animation-mid-frames)
+                         (max 0 (truncate vhl/animation-mid-frames))
+                       0)))
 
-    (put face 'vhl/pulse/start-bg-color bg-color)
-    
+    (put face 'vhl/pulse/prestart-bg-color (apply 'color-rgb-to-hex prestart-rgb))
+
     (mapcar (apply-partially 'apply 'color-rgb-to-hex)
-            (color-gradient start stop vhl/animation-iterations))))
+            ;; `color-gradient' omits the start/stop colors; add them explicitly
+            ;; so the animation always begins and ends with the expected frames.
+            `(,start-rgb
+              ,@(and (< 0 mid-frames) (color-gradient start-rgb stop-rgb mid-frames))
+              ,stop-rgb))))
 
 ;;-----------------------------------------------------------------------------
 ;; (vhl/pulse/.prepare-for-face FACE) => VOID
@@ -634,7 +675,7 @@ the standard pulse (highlight color to default background)."
         (put face 'vhl/pulse/orig-bg-color (face-background face nil 'default))
         (put face 'vhl/pulse/gradient-bg-color-lst
              (vhl/pulse/.make-color-gradient face))
-        (set-face-background face (get face 'vhl/pulse/start-bg-color))
+        (set-face-background face (get face 'vhl/pulse/prestart-bg-color))
         
         ;; Remember which face will be pulsed on next idle time;
         ;; then make pulse animation on next idle time.
@@ -671,7 +712,7 @@ If no colors remain, then:
             (setq has-pending-gradient-colors-p
                   (or has-pending-gradient-colors-p gradient-colors))))))
     ;; Make delay.
-    (sleep-for vhl/animation-iteration-delay)
+    (sleep-for vhl/animation-frame-interval)
 
     (cond
      ((and has-pending-gradient-colors-p

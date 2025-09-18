@@ -209,6 +209,49 @@ non-nil."
             (should (= (vhl/test--count-vhl-overlays (point-min) (point-max)) 0)))
         (volatile-highlights-mode -1)))))
 
+(ert-deftest vhl/test-animation-prestart-opacity-fade-in ()
+  "fade-in honors vhl/animation-prestart-opacity for initial color."
+  (let* ((face 'vhl/test-face-fade-in)
+         (orig-default-bg (face-background 'default nil 'default)))
+    (unwind-protect
+        (let ((vhl/animation-style 'fade-in)
+              (vhl/animation-prestart-opacity 0.5)
+              (vhl/animation-mid-frames 4))
+          (make-face face)
+          (set-face-background face "#ff0000")
+          (set-face-background 'default "#000000")
+          (let* ((gradient (vhl/pulse/.make-color-gradient face))
+                 (expected (color-rgb-to-hex 0.5 0.0 0.0)))
+            (should (equal (get face 'vhl/pulse/prestart-bg-color) expected))
+            (should (member expected gradient))))
+      (when orig-default-bg
+        (set-face-background 'default orig-default-bg))
+      (vhl/pulse/reset-face face)
+      (when (and (facep face) (fboundp 'delete-face))
+        (delete-face face)))))
+
+(ert-deftest vhl/test-animation-prestart-opacity-pulse ()
+  "pulse honors vhl/animation-prestart-opacity for initial color."
+  (let* ((face 'vhl/test-face-pulse)
+         (orig-default-bg (face-background 'default nil 'default)))
+    (unwind-protect
+        (let ((vhl/animation-style 'pulse)
+              (vhl/animation-prestart-opacity 0.25)
+              (vhl/animation-mid-frames 4))
+          (make-face face)
+          (set-face-background face "#00ff00")
+          (set-face-background 'default "#000000")
+          (let* ((gradient (vhl/pulse/.make-color-gradient face))
+                 (prestart-expected (color-rgb-to-hex 0.0 0.25 0.0))
+                 (highlight-expected (color-rgb-to-hex 0.0 1.0 0.0)))
+            (should (equal (get face 'vhl/pulse/prestart-bg-color) prestart-expected))
+            (should (member highlight-expected gradient))))
+      (when orig-default-bg
+        (set-face-background 'default orig-default-bg))
+      (vhl/pulse/reset-face face)
+      (when (and (facep face) (fboundp 'delete-face))
+        (delete-face face)))))
+
 (ert-deftest vhl/test-undo-highlights ()
   "undo highlights affected text."
   (with-temp-buffer

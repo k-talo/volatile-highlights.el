@@ -68,19 +68,24 @@ Choose animation via `vhl/animation-style`:
 ## Tuning Animations
 
 Core variables
-- `vhl/animation-iterations`: steps per animation. Higher is smoother but costs
-  more CPU. Typical range: 6-12.
-- `vhl/animation-iteration-delay`: per-step delay in seconds. Lower is faster; a
-  common range is 0.01-0.03.
+- `vhl/animation-mid-frames`: internal frames between the start and end colors.
+  Higher numbers insert more frames between those endpoints and increase CPU
+  cost. Typical range: 4-10.
+- `vhl/animation-frame-interval`: per-frame (tick) delay in seconds. Lower is
+  faster; a common range is 0.01-0.03.
 - `vhl/animation-start-delay`: delay before the animation begins (seconds). For
   animated styles, the delay is counted after Emacs becomes idle (idle timer),
   which avoids interrupting rapid command sequences. Set to 0 to start as soon
   as Emacs becomes idle; 0.1-0.2 often keeps the UI responsive during bursts of
   edits. For `static`, highlights appear immediately.
+- `vhl/animation-prestart-opacity`: opacity of the hint shown before
+  idle-driven animations. Increase this when you want lighter or darker instant
+  feedback during rapid command sequences. Leave it `nil` to use the style
+  defaults (`fade-in` = 0.0, `pulse` = 1.0).
 
 Suggested starting points (tune to taste)
-- `fade-in`: `vhl/animation-iterations` = 6, `vhl/animation-iteration-delay` = 0.03
-- `pulse`: `vhl/animation-iterations` = 12, `vhl/animation-iteration-delay` = 0.05
+- `fade-in`: `vhl/animation-mid-frames` = 4, `vhl/animation-frame-interval` = 0.03
+- `pulse`: `vhl/animation-mid-frames` = 10, `vhl/animation-frame-interval` = 0.05
 
 Troubleshooting
 - If highlights are hard to see, increase contrast by changing

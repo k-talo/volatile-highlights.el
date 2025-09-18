@@ -78,6 +78,11 @@ This interface allows you to:
     - `'static`: static highlight (default)
     - `'fade-in`: fade in, then stay until next command
     - `'pulse`: pulse (fade-out), then clear automatically
+-   Adjust the prestart hint intensity of animated highlights with
+    `vhl/animation-prestart-opacity` (auto per style by default).
+    Animated styles wait for Emacs to become idle, so increasing this
+    value shows a subtle hint immediately while the full animation
+    still runs later.
 -   Highlight zero-width ranges (`vhl/highlight-zero-width-ranges`, default: disabled): also mark deletion points as a 1-character highlight.
 
 ### Example Customizations with `use-package`
@@ -95,11 +100,11 @@ Here are some examples of how you might configure the package in your `init.el`:
   :config
   (volatile-highlights-mode 1)
   ;; Prefer customize-set-variable (or setopt on Emacs 29.1+) so :set hooks run
-  (customize-set-variable 'vhl/animation-iterations 6)
-  (customize-set-variable 'vhl/animation-iteration-delay 0.03)
+  (customize-set-variable 'vhl/animation-mid-frames 4)
+  (customize-set-variable 'vhl/animation-frame-interval 0.03)
   ;; On Emacs 29.1+ you can instead use:
-  ;; (setopt vhl/animation-iterations 6
-  ;;         vhl/animation-iteration-delay 0.03)
+  ;; (setopt vhl/animation-mid-frames 4
+  ;;         vhl/animation-frame-interval 0.03)
   )
 ```
 
