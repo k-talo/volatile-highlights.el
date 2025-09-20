@@ -72,12 +72,14 @@ Core variables
   Higher numbers insert more frames between those endpoints and increase CPU
   cost. Typical range: 4-10.
 - `vhl/animation-frame-interval`: per-frame (tick) delay in seconds. Lower is
-  faster; a common range is 0.01-0.03.
-- `vhl/animation-start-delay`: delay before the animation begins (seconds). For
+  faster; a common range is 0.03-0.05.
+- `vhl/animation-start-delay` (default: 0.15s): delay before the animation begins
+  (seconds). For
   animated styles, the delay is counted after Emacs becomes idle (idle timer),
-  which avoids interrupting rapid command sequences. Set to 0 to start as soon
-  as Emacs becomes idle; 0.1-0.2 often keeps the UI responsive during bursts of
-  edits. For `static`, highlights appear immediately.
+  which avoids interrupting rapid command sequences. Values around 0.01 give
+  almost instant feedback, but the animation may trigger after every command.
+  Lengthen it toward 0.2 seconds if rapid edits make the animation feel noisy.
+  For `static`, highlights appear immediately.
 - `vhl/animation-prestart-opacity`: opacity of the hint shown before
   idle-driven animations. Increase this when you want lighter or darker instant
   feedback during rapid command sequences. Leave it `nil` to use the style

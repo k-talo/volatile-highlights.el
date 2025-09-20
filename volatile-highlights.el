@@ -393,8 +393,9 @@ perceived lag during bursts of edits.  Set this to 0 to start as soon
 as Emacs becomes idle (still after the command returns).
 
 For \='static, there is no idle wait and highlights appear immediately,
-providing the best responsiveness.  A common sweet spot for
-`vhl/animation-start-delay' is 0.1-0.2 seconds; tune to taste."
+providing the best responsiveness.  Around 0.01 seconds yields almost
+instant feedback; increase the delay toward 0.2 seconds if rapid edits
+make the animation feel noisy."
   :type 'number
   :group 'volatile-highlights)
 
