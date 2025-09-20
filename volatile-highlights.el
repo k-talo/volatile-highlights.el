@@ -634,10 +634,13 @@ starting point is influenced by `vhl/animation-prestart-opacity'."
                       ;; When the value is not a number, fall back to a
                       ;; style-appropriate default.
                       (if fade-in-p 0.0 1.0)))
-         (bg-name (face-background 'default))
-         (hl-name (or (face-background face nil 'default) bg-name))
-         (hl-rgb (color-name-to-rgb hl-name))
-         (bg-rgb (color-name-to-rgb bg-name))
+         (bg-name (or (face-attribute 'default :background nil t)
+                      (frame-parameter nil 'background-color)))
+         (hl-name (face-background face nil 'default))
+         (hl-rgb (or (ignore-errors (color-name-to-rgb hl-name))
+                     '(1.0 1.0 1.0))) ;; Fall back to "#FFFFFF"
+         (bg-rgb (or (ignore-errors (color-name-to-rgb bg-name))
+                     '(0.0 0.0 0.0))) ;; Fall back to "#000000"
          (prestart-rgb (vhl/pulse/.mix-rgb bg-rgb hl-rgb opacity))
          (start-rgb (if fade-in-p prestart-rgb hl-rgb))
          (stop-rgb (if fade-in-p hl-rgb bg-rgb))
