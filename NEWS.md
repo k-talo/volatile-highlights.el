@@ -3,8 +3,7 @@
 ## 1.19 – 2025-09-21
 
 ### Animation updates
-- Introduced a new animation mode: `'fade-in`;
-  Choose animation mode via new defcustom `vhl/animation-style`, (`'static` | `'fade-in` | `'pulse`) ([`8752c8c`](https://github.com/k-talo/volatile-highlights.el/commit/8752c8c), [`cf3e74d`](https://github.com/k-talo/volatile-highlights.el/commit/cf3e74d), [`d82f01b`](https://github.com/k-talo/volatile-highlights.el/commit/d82f01b)).
+- Introduced a new `'fade-in` animation mode and the `vhl/animation-style` defcustom (choices: `'static`, `'fade-in`, `'pulse`) ([`8752c8c`](https://github.com/k-talo/volatile-highlights.el/commit/8752c8c), [`cf3e74d`](https://github.com/k-talo/volatile-highlights.el/commit/cf3e74d), [`d82f01b`](https://github.com/k-talo/volatile-highlights.el/commit/d82f01b)).
 - Introduced `vhl/animation-prestart-opacity` for immediate pre-flash hints ([`7cba75e`](https://github.com/k-talo/volatile-highlights.el/commit/7cba75e), [`e21445b`](https://github.com/k-talo/volatile-highlights.el/commit/e21445b)).
 - Renamed animation defcustoms and marked the old `vhl/pulse-*` options obsolete ([`8752c8c`](https://github.com/k-talo/volatile-highlights.el/commit/8752c8c), [`7233c37`](https://github.com/k-talo/volatile-highlights.el/commit/7233c37), [`cf3e74d`](https://github.com/k-talo/volatile-highlights.el/commit/cf3e74d), [`d82f01b`](https://github.com/k-talo/volatile-highlights.el/commit/d82f01b), [`7cba75e`](https://github.com/k-talo/volatile-highlights.el/commit/7cba75e)):
   - `vhl/use-pulsing-visual-effect-p` -> `vhl/animation-style`
@@ -14,63 +13,53 @@
 
 ### Highlight coverage
 
-- Highlight replacements produced by `query-replace`, `replace-string`, etc. ([`8160ba4`](https://github.com/k-talo/volatile-highlights.el/commit/8160ba4)).
-- Highlight transpose command results by `transpose-words`, `transpose-line`, etc. ([`19b3844`](https://github.com/k-talo/volatile-highlights.el/commit/19b3844)).
-- Add a non-pulsing volatile highlight after `xref` jumps (default: off) ([`9b3121d`](https://github.com/k-talo/volatile-highlights.el/commit/9b3121d), [`d6ec9e1`](https://github.com/k-talo/volatile-highlights.el/commit/d6ec9e1)).
+- Highlighted replacements produced by `query-replace`, `replace-string`, etc. ([`8160ba4`](https://github.com/k-talo/volatile-highlights.el/commit/8160ba4)).
+- Highlighted the results of transpose commands (for example, `transpose-words`, `transpose-lines`, etc.) ([`19b3844`](https://github.com/k-talo/volatile-highlights.el/commit/19b3844)).
+- Added a non-pulsing volatile highlight after `xref` jumps (default: off) ([`9b3121d`](https://github.com/k-talo/volatile-highlights.el/commit/9b3121d), [`d6ec9e1`](https://github.com/k-talo/volatile-highlights.el/commit/d6ec9e1)).
 
 ### Documentation & guides
 
-- Update README and DOCS
-  - Emphasize MELPA install and `use-package` configuration ([`c0eb319`](https://github.com/k-talo/volatile-highlights.el/commit/c0eb319));
-    Replace `:hook` with `:config` to make sure `(volatile-highlights-mode 1)` ([`a6015bd`](https://github.com/k-talo/volatile-highlights.el/commit/a6015bd)).
-  - Testing (ERT and byte-compile) ([`f33f256`](https://github.com/k-talo/volatile-highlights.el/commit/f33f256), [`e755c04`](https://github.com/k-talo/volatile-highlights.el/commit/e755c04)).
+- Updated the README and documentation:
+  - Emphasized MELPA install and `use-package` configuration and replaced `:hook` with `:config` to ensure `(volatile-highlights-mode 1)` (commits [`c0eb319`](https://github.com/k-talo/volatile-highlights.el/commit/c0eb319), [`a6015bd`](https://github.com/k-talo/volatile-highlights.el/commit/a6015bd)).
+  - Documented testing (ERT and byte compilation) ([`f33f256`](https://github.com/k-talo/volatile-highlights.el/commit/f33f256), [`e755c04`](https://github.com/k-talo/volatile-highlights.el/commit/e755c04)).
   - Clarified `xref` documentation regarding volatile highlights ([`28479b8`](https://github.com/k-talo/volatile-highlights.el/commit/28479b8), [`d6ec9e1`](https://github.com/k-talo/volatile-highlights.el/commit/d6ec9e1)).
-  - Clarified `occur` documentation regarding to volatile highlights ([`360407f`](https://github.com/k-talo/volatile-highlights.el/commit/360407f)).
-  - Expanded the extending guide: `docs/extending.md` (Quick Start, user/dev examples, internals, API) ([`6c81742`](https://github.com/k-talo/volatile-highlights.el/commit/6c81742), [`64b26ca`](https://github.com/k-talo/volatile-highlights.el/commit/64b26ca)).
-  - Split appearance and tuning documentation: `docs/appearance-and-tuning.md`;
-    Refreshed animation guidance;
-    Replace setq with customize-set-variable in README;
-    Add setopt notes (29.1+) ([`ea9f6b6`](https://github.com/k-talo/volatile-highlights.el/commit/ea9f6b6)).
-  - Add tuning tips and suggested values;
-    Update examples ([`ee3c7b8`](https://github.com/k-talo/volatile-highlights.el/commit/ee3c7b8))
-- Adjust the appearance of the README
-  - Align Overview wording with the package summary:
-    "Transient visual feedback for edits.";
-    Added README badges ([`7e48139`](https://github.com/k-talo/volatile-highlights.el/commit/7e48139)).
-  - Added a volatile-highlights summary tagline to the README:
-    "Highlights are volatile; they vanish on your next command." ([`23ab66e`](https://github.com/k-talo/volatile-highlights.el/commit/23ab66e)).
-- Other document updats
-  - Add LICENSE file and add LICENCE section to README ([`1a0f8b7`](https://github.com/k-talo/volatile-highlights.el/commit/1a0f8b7)).
-  - Use standard email in headers;
-    Add Issues link to README ([`9b3fe0b`](https://github.com/k-talo/volatile-highlights.el/commit/9b3fe0b)).
+  - Clarified `occur` documentation regarding volatile highlights ([`360407f`](https://github.com/k-talo/volatile-highlights.el/commit/360407f)).
+  - Expanded the extending guide (`docs/extending.md`) with quick-start instructions, user/developer examples, internals, and API notes ([`6c81742`](https://github.com/k-talo/volatile-highlights.el/commit/6c81742), [`64b26ca`](https://github.com/k-talo/volatile-highlights.el/commit/64b26ca)).
+  - Split the appearance and tuning documentation (`docs/appearance-and-tuning.md`), refreshed the animation guidance, replaced `setq` with `customize-set-variable` in the README, and added `setopt` notes (29.1+) ([`ea9f6b6`](https://github.com/k-talo/volatile-highlights.el/commit/ea9f6b6)).
+  - Added tuning tips, suggested values, and updated examples ([`ee3c7b8`](https://github.com/k-talo/volatile-highlights.el/commit/ee3c7b8)).
+- Adjusted the appearance of the README:
+  - Aligned the Overview wording with the package summary ("Transient visual feedback for edits.") and added README badges ([`7e48139`](https://github.com/k-talo/volatile-highlights.el/commit/7e48139)).
+  - Added the volatile-highlights summary tagline to the README ("Highlights are volatile; they vanish on your next command.") ([`23ab66e`](https://github.com/k-talo/volatile-highlights.el/commit/23ab66e)).
+- Other documentation updates:
+  - Added a LICENSE file and a LICENSE section to the README ([`1a0f8b7`](https://github.com/k-talo/volatile-highlights.el/commit/1a0f8b7)).
+  - Used the standard author email in headers and added an Issues link to the README ([`9b3fe0b`](https://github.com/k-talo/volatile-highlights.el/commit/9b3fe0b)).
 
 ### Packaging & infrastructure
-- Regression Fix
-  - Fixed package autoload generation for package.el installs and added the missing autoload cookies ([`3952439`](https://github.com/k-talo/volatile-highlights.el/commit/3952439), [`66cf0b5`](https://github.com/k-talo/volatile-highlights.el/commit/66cf0b5)) [fix [#28](https://github.com/k-talo/volatile-highlights.el/issues/28)].
+- Regression fixes:
+  - Fixed package autoload generation for package.el installs (and added the missing autoload cookies) ([`3952439`](https://github.com/k-talo/volatile-highlights.el/commit/3952439), [`66cf0b5`](https://github.com/k-talo/volatile-highlights.el/commit/66cf0b5)) [fix [#28](https://github.com/k-talo/volatile-highlights.el/issues/28)].
   - Ensured the default face inherits correctly from the active theme ([`63c1e3e`](https://github.com/k-talo/volatile-highlights.el/commit/63c1e3e), [`da88fd1`](https://github.com/k-talo/volatile-highlights.el/commit/da88fd1)).
-- Compile & Test
-  - Makefile
-    - Add `Makefile` for `compile` and ERT `tests`; `EMACS`, `EMACSFLAGS` and `TMPDIR` flags ([`e755c04`](https://github.com/k-talo/volatile-highlights.el/commit/e755c04))
-    - Add target `checkdoc`, `package-lint`, `lint`, `check`; `PKGDIR` flag ([`dea59aa`](https://github.com/k-talo/volatile-highlights.el/commit/dea59aa), [`b6fc3e4`](https://github.com/k-talo/volatile-highlights.el/commit/b6fc3e4))
-  - Add ERT tests.
-    - Add minimal ERT tests for `add-range`, `add-position`, `clear-all` ([`f33f256`](https://github.com/k-talo/volatile-highlights.el/commit/f33f256))
-    - Add `yank`, `undo` tests and position clamp case ([`2dd309c`](https://github.com/k-talo/volatile-highlights.el/commit/2dd309c))
-    - Add tests for `xref` ([`9b3121d`](https://github.com/k-talo/volatile-highlights.el/commit/9b3121d))
-    - Run assertions with the minor mode enabled;
-      Add tests ensuring `add-range/position` are no-ops when the mode is disabled ([`dcfcca1`](https://github.com/k-talo/volatile-highlights.el/commit/dcfcca1))
-    - Add tests for `perform-replace` ([`8160ba4`](https://github.com/k-talo/volatile-highlights.el/commit/8160ba4))
-    - Add tests for `animation-prestart-opacity` ([`7cba75e`](https://github.com/k-talo/volatile-highlights.el/commit/7cba75e))
-  - LINT
-    - `byte-compile` clean ([`66cf0b5`](https://github.com/k-talo/volatile-highlights.el/commit/66cf0b5), [`d26b952`](https://github.com/k-talo/volatile-highlights.el/commit/d26b952)).
-    - `checkdoc` clean ([`f16d4e2`](https://github.com/k-talo/volatile-highlights.el/commit/f16d4e2), [`ee3c7b8`](https://github.com/k-talo/volatile-highlights.el/commit/ee3c7b8)).
-    - `package-lint` clean, without symbol and namespace warnings with `vhl/` ([`b2d9738`](https://github.com/k-talo/volatile-highlights.el/commit/b2d9738)).
-    - Remove XEmacs-specific code which has been effectively unmaintained for years ([`b2d9738`](https://github.com/k-talo/volatile-highlights.el/commit/b2d9738)).
-- Refactor(API):
-  - Unify extension arg names to `NAME` ([`dc963b7`](https://github.com/k-talo/volatile-highlights.el/commit/dc963b7));
-  - Rename `Vhl/highlight-zero-width-ranges` to `vhl/highlight-zero-width-ranges` ([`15b587c`](https://github.com/k-talo/volatile-highlights.el/commit/15b587c)).
-  - Move obsolete alias declarations before defcustoms to silence warnings ([`ee3c7b8`](https://github.com/k-talo/volatile-highlights.el/commit/ee3c7b8)).
-- Chore
-  - ALIGNED version metadata across headers ([`f33f256`](https://github.com/k-talo/volatile-highlights.el/commit/f33f256)).
+- Build and test infrastructure:
+  - Makefile:
+    - Added a `Makefile` for `compile` and ERT `tests` (honouring the `EMACS`, `EMACSFLAGS`, and `TMPDIR` flags) ([`e755c04`](https://github.com/k-talo/volatile-highlights.el/commit/e755c04)).
+    - Added targets `checkdoc`, `package-lint`, `lint`, and `check` (with a `PKGDIR` flag) ([`dea59aa`](https://github.com/k-talo/volatile-highlights.el/commit/dea59aa), [`b6fc3e4`](https://github.com/k-talo/volatile-highlights.el/commit/b6fc3e4)).
+  - ERT tests:
+    - Added minimal ERT tests for `add-range`, `add-position`, `clear-all` ([`f33f256`](https://github.com/k-talo/volatile-highlights.el/commit/f33f256))
+    - Added `yank`, `undo`, and position-clamp tests ([`2dd309c`](https://github.com/k-talo/volatile-highlights.el/commit/2dd309c))
+    - Added tests for `xref` ([`9b3121d`](https://github.com/k-talo/volatile-highlights.el/commit/9b3121d))
+    - Added tests that confirm `vhl/add-range` and `vhl/add-position` are no-ops when the mode is disabled ([`dcfcca1`](https://github.com/k-talo/volatile-highlights.el/commit/dcfcca1))
+    - Added tests for `perform-replace` ([`8160ba4`](https://github.com/k-talo/volatile-highlights.el/commit/8160ba4)).
+    - Added tests for `animation-prestart-opacity` ([`7cba75e`](https://github.com/k-talo/volatile-highlights.el/commit/7cba75e)).
+  - Linting:
+    - Achieved a `byte-compile` clean run ([`66cf0b5`](https://github.com/k-talo/volatile-highlights.el/commit/66cf0b5), [`d26b952`](https://github.com/k-talo/volatile-highlights.el/commit/d26b952)).
+    - Achieved a `checkdoc` clean run ([`f16d4e2`](https://github.com/k-talo/volatile-highlights.el/commit/f16d4e2), [`ee3c7b8`](https://github.com/k-talo/volatile-highlights.el/commit/ee3c7b8)).
+    - Achieved a `package-lint` clean, except the known namespace complaints about the legacy `vhl/` prefix ([`b2d9738`](https://github.com/k-talo/volatile-highlights.el/commit/b2d9738)).
+    - Removed XEmacs-specific code that had been effectively unmaintained for years ([`b2d9738`](https://github.com/k-talo/volatile-highlights.el/commit/b2d9738)).
+- API refactor:
+  - Unified extension argument names to `NAME` ([`dc963b7`](https://github.com/k-talo/volatile-highlights.el/commit/dc963b7));
+  - Renamed `Vhl/highlight-zero-width-ranges` to `vhl/highlight-zero-width-ranges` ([`15b587c`](https://github.com/k-talo/volatile-highlights.el/commit/15b587c)).
+  - Moved obsolete alias declarations before defcustoms to silence warnings ([`ee3c7b8`](https://github.com/k-talo/volatile-highlights.el/commit/ee3c7b8)).
+- Chores
+  - Aligned version metadata across headers ([`f33f256`](https://github.com/k-talo/volatile-highlights.el/commit/f33f256)).
 
 ## 1.18 – 2025-07-22
 - Reassigned `vhl/use-pulsing-visual-effect-p` to the `volatile-highlights` customization group ([`6b3066f`](https://github.com/k-talo/volatile-highlights.el/commit/6b3066f)).
