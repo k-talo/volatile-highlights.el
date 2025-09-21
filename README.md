@@ -2,6 +2,12 @@
 
 [![MELPA](https://melpa.org/packages/volatile-highlights-badge.svg)](https://melpa.org/#/volatile-highlights) [![MELPA Stable](https://stable.melpa.org/packages/volatile-highlights-badge.svg)](https://stable.melpa.org/#/volatile-highlights) [![License: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Emacs](https://img.shields.io/badge/Emacs-24.4%2B-blue.svg)](https://www.gnu.org/software/emacs/)
 
+> **Heads up (September 2025):** v1.19 is planned to be the last 1.x release.
+> We will still backport fixes for critical regressions if they appear, but new
+> development is focused on v2.x where commands/variables move to the shorter
+> and clean `vhl-*` prefix.
+> See [NEWS.md](NEWS.md) for release notes, the migration timeline, and recent cleanups.
+
 ## Overview
 
 Highlights are volatile; they vanish on your next command.
@@ -12,7 +18,9 @@ the affected text is briefly highlighted and cleared on the next user command.
 
 For example, yanking highlights the inserted text, and undo highlights the restored text.
 
-For integration with other packages and developer-oriented examples, see the Extending Guide: [docs/extending.md](docs/extending.md).
+Explore the Extending Guide for integration patterns and developer-oriented examples: [docs/extending.md](docs/extending.md).
+Review animation tuning and appearance tips in [docs/appearance-and-tuning.md](docs/appearance-and-tuning.md).
+Check upcoming migrations and detailed release notes in [NEWS.md](NEWS.md).
 
 ## Installation
 
@@ -184,6 +192,10 @@ To integrate with `undo-tree`:
     (vhl/define-extension 'undo-tree 'undo-tree-yank)
     (vhl/install-extension 'undo-tree)))
 ```
+
+## Release Notes
+
+For a chronological summary of releases, planned migrations, and recent maintenance work, see [NEWS.md](NEWS.md).
 
 ## Development: Compile & Test
 
