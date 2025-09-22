@@ -8,27 +8,6 @@
 > and clean `vhl-*` prefix.
 > See [NEWS.md](NEWS.md) for release notes, the migration timeline, and recent cleanups.
 
-> **Known Issue (v1.9):** Zerowidth highlights (`vhl/highlight-zero-width-ranges`) inherit the
-> default `secondary-selection` color (`yellow1`) when the option is set via `:custom`.
-> For example:
-> ```emacs-lisp
-> ;; Works as expected because it runs after your theme loads.
-> (use-package volatile-highlights
->   :ensure t
->   :config
->   (volatile-highlights-mode 1)
->   (customize-set-variable 'vhl/highlight-zero-width-ranges t))
-> 
-> ;; May fall back to the default `secondary-selection` color (`yellow1`).
-> (use-package volatile-highlights
->   :ensure t
->   :custom
->   (vhl/highlight-zero-width-ranges t)
->   :config
->   (volatile-highlights-mode 1))
-> ```
-> Set the option in a `:config` block (as above) or customize `vhl/default-face` after your theme loads to keep your theme's colors.
-We are actively working on smoothing out this behavior for 1.9 users.
 
 ## Overview
 
