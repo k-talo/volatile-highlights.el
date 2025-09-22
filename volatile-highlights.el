@@ -313,17 +313,17 @@ and appearance."
   "Animation style for volatile highlighting.
 
 Choose how highlights animate:
- - \='static: No animation; keep a solid highlight until the next command.
- - \='fade-in: Fade in from the default background to the highlight color,
+ - \\='static: No animation; keep a solid highlight until the next command.
+ - \\='fade-in: Fade in from the default background to the highlight color,
    then keep the solid highlight until the next command.
- - \='pulse: Fade out from the highlight color toward the default background,
+ - \\='pulse: Fade out from the highlight color toward the default background,
    then clear automatically when the animation ends.
 
 Timing and responsiveness:
   - Animated styles run on an idle timer after Emacs becomes idle, and
    honor `vhl/animation-start-delay'.  This avoids animations interrupting
    rapid command sequences.
- - \='static shows highlights immediately (no idle wait) and is the most
+ - \\='static shows highlights immediately (no idle wait) and is the most
    responsive option.
 
 If an animation style is selected but `vhl/pulse/available-p' returns nil
@@ -339,7 +339,7 @@ on the current frame, fall back to static behavior."
 (defcustom vhl/use-pulsing-visual-effect-p nil
   "Obsolete.  Use `vhl/animation-style' instead.
 
-When set: nil -> \='static, -1 -> \='fade-in, other non-nil -> \='pulse."
+When set: nil -> \\='static, -1 -> \\='fade-in, other non-nil -> \\='pulse."
   :group 'volatile-highlights
   :type '(choice (const :tag "Static (no animation)" nil)
                  (const :tag "Fade-in then stay" -1)
@@ -378,21 +378,21 @@ When set: nil -> \='static, -1 -> \='fade-in, other non-nil -> \='pulse."
 The animation always shows the start frame first and the end frame
 last; setting this value to 0 therefore yields just the start and stop
 colors.  Higher values are smoother but increase CPU cost.  Applies to
-both \='fade-in and \='pulse styles.  Typical values range from 4 to 10.
-Suggested starting points: \='fade-in: 4, \='pulse: 10."
+both \\='fade-in and \\='pulse styles.  Typical values range from 4 to 10.
+Suggested starting points: \\='fade-in: 4, \\='pulse: 10."
   :type 'number
   :group 'volatile-highlights)
 
 (defcustom vhl/animation-start-delay 0.15
   "Delay (seconds) before starting the highlight animation.
 
-For animated styles (\='fade-in or \='pulse), this delay is counted after
+For animated styles (\\='fade-in or \\='pulse), this delay is counted after
 Emacs becomes idle; the animation runs on an idle timer.  This design
 avoids animations interrupting rapid command sequences and adding
 perceived lag during bursts of edits.  Set this to 0 to start as soon
 as Emacs becomes idle (still after the command returns).
 
-For \='static, there is no idle wait and highlights appear immediately,
+For \\='static, there is no idle wait and highlights appear immediately,
 providing the best responsiveness.  Around 0.01 seconds yields almost
 instant feedback; increase the delay toward 0.2 seconds if rapid edits
 make the animation feel noisy."
@@ -405,8 +405,8 @@ make the animation feel noisy."
 Animated styles wait for Emacs to become idle, so rapid command
 sequences would otherwise only reveal the last highlight.  The
 prestart hint appears immediately while the full animation still runs
-later.  When nil, choose a style-appropriate default: 0.0 for \='fade-in
-and 1.0 for \='pulse.  Otherwise use a float between 0.0 (same as the
+later.  When nil, choose a style-appropriate default: 0.0 for \\='fade-in
+and 1.0 for \\='pulse.  Otherwise use a float between 0.0 (same as the
 default background) and 1.0 (fully opaque highlight color)."
   :type '(choice (const :tag "Auto (style default)" nil)
                  (number :tag "Opacity"))
@@ -416,9 +416,9 @@ default background) and 1.0 (fully opaque highlight color)."
   "Delay between animation frame ticks in seconds.
 
 Lower values advance the animation faster but can cost more CPU; higher
-values slow it down.  Applies to both \='fade-in and \='pulse styles.
+values slow it down.  Applies to both \\='fade-in and \\='pulse styles.
 Typical values range from 0.03 to 0.05.  Suggested starting points:
-\='fade-in: 0.03, \='pulse: 0.05."
+\\='fade-in: 0.03, \\='pulse: 0.05."
   :type 'number
   :group 'volatile-highlights)
 
@@ -621,7 +621,7 @@ highlights start from the face's original background."
 (defun vhl/pulse/.make-color-gradient (face)
   "Return a list of gradient colors for animating FACE.
 
-When `vhl/animation-style' is \='fade-in, generate a gradient
+When `vhl/animation-style' is \\='fade-in, generate a gradient
 from the default background to the highlight color.  Otherwise generate
 the standard pulse (highlight color to default background).  The
 starting point is influenced by `vhl/animation-prestart-opacity'."
