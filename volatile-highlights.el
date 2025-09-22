@@ -273,7 +273,6 @@
   "Visual feedback on operations."
   :group 'editing)
 
-
 ;;;###autoload
 (defface vhl/default-face
   '((t :inherit secondary-selection))
@@ -333,34 +332,22 @@ on the current frame, fall back to static behavior."
                  (const :tag "Fade-in then stay" fade-in)
                  (const :tag "Pulse (fade-out)" pulse)))
 
-;; Backward compatibility: older versions used `vhl/use-pulsing-visual-effect-p'
-;; as a tri-state variable where nil=static, -1=fade-in, other non-nil=pulse.
-;; Keep it as an obsolete interface that maps to the new style.
 (defcustom vhl/use-pulsing-visual-effect-p nil
   "Obsolete.  Use `vhl/animation-style' instead.
 
-When set: nil -> \\='static, -1 -> \\='fade-in, other non-nil -> \\='pulse."
+Legacy configurations may still toggle this variable; while it remains
+available for compatibility it no longer changes `vhl/animation-style'
+directly.  Support for it is handled inside `vhl/pulse/.prepare-for-face'
+and will be removed in a future major release."
   :group 'volatile-highlights
   :type '(choice (const :tag "Static (no animation)" nil)
                  (const :tag "Fade-in then stay" -1)
                  (other :tag "Pulse (fade-out)" t))
   :set (lambda (sym val)
-         (set-default sym val)
-         (setq vhl/animation-style
-               (cond ((null val) 'static)
-                     ((and (numberp val) (= val -1)) 'fade-in)
-                     (t 'pulse)))))
+         (set-default sym val)))
 
-;; If users set the old variable in init before loading this library,
-;; map its value into the new style on load.
-(when (and (boundp 'vhl/use-pulsing-visual-effect-p)
-           vhl/use-pulsing-visual-effect-p)
-  (message "[vhl] `vhl/use-pulsing-visual-effect-p' is obsolete; use `vhl/animation-style' instead.")
-  (let ((val vhl/use-pulsing-visual-effect-p))
-    (setq vhl/animation-style
-          (cond ((and (numberp val) (= val -1)) 'fade-in)
-                (t 'pulse)))))
-
+(make-obsolete-variable 'vhl/use-pulsing-visual-effect-p
+                        'vhl/animation-style "1.19")
 
 ;; Backward compatibility for renamed animation defcustoms.
 ;; Keep old `vhl/pulse-*' user options as obsolete aliases. Declare
@@ -663,8 +650,23 @@ starting point is influenced by `vhl/animation-prestart-opacity'."
 ;;-----------------------------------------------------------------------------
 (defun vhl/pulse/.prepare-for-face (face)
   "Prepare FACE for animation by saving original background and gradient."
-  (let ((use-anim-p (and (vhl/pulse/available-p)
-                         (not (eq vhl/animation-style 'static)))))
+  (let* ((vhl/animation-style (if (eq vhl/animation-style 'static)
+                                  ;; Legacy compatibility: interpret the
+                                  ;; obsolete `vhl/use-pulsing-visual-effect-p'
+                                  ;; value while the user migrates to the new
+                                  ;; defcustom.  Future releases can remove
+                                  ;; this helper.
+                                  (cond
+                                   ((and (numberp vhl/use-pulsing-visual-effect-p)
+                                         (<= vhl/use-pulsing-visual-effect-p 0))
+                                    'fade-in)
+                                   ((null vhl/use-pulsing-visual-effect-p)
+                                    'static)
+                                   (t
+                                    'pulse))
+                                vhl/animation-style))
+         (use-anim-p (and (vhl/pulse/available-p)
+                          (not (eq vhl/animation-style 'static)))))
     (when (and use-anim-p
                (facep face)
                ;; do nothing the face is already set up.
