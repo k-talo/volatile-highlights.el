@@ -2,13 +2,6 @@
 
 [![MELPA](https://melpa.org/packages/volatile-highlights-badge.svg)](https://melpa.org/#/volatile-highlights) [![MELPA Stable](https://stable.melpa.org/packages/volatile-highlights-badge.svg)](https://stable.melpa.org/#/volatile-highlights) [![License: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Emacs](https://img.shields.io/badge/Emacs-24.4%2B-blue.svg)](https://www.gnu.org/software/emacs/)
 
-> **Heads up (September 2025):** v1.19 is planned to be the last 1.x release.
-> We will still backport fixes for critical regressions if they appear, but new
-> development is focused on v2.x where commands/variables move to the shorter
-> and clean `vhl-*` prefix.
-> See [NEWS.md](NEWS.md) for release notes, the migration timeline, and recent cleanups.
-
-
 ## Overview
 
 Highlights are volatile; they vanish on your next command.

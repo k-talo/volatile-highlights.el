@@ -1,8 +1,32 @@
 # News
 
-## 1.19 - 2025-09-21
+## Future releases
 
-Starting with this release, new feature work continues on the v2.x branch where commands and variables migrate to the `vhl-*` prefix; 1.x will receive critical fixes only.
+- Feature development now happens on the `v2-main` branch where commands and variables migrate to the `vhl-*` prefix.
+  - use-package (Emacs 29+/use-package 4.x+ for `:vc`):
+    ```emacs-lisp
+    (use-package volatile-highlights
+      :ensure nil
+      :load-path "~/.emacs.d/site-lisp/volatile-highlights.el"
+      :vc (:fetcher github
+           :repo "k-talo/volatile-highlights.el"
+           :branch "v2-main"))
+    ```
+  - Git:
+    ```console
+    git clone -b v2-main https://github.com/k-talo/volatile-highlights.el
+    ```
+- We will continue to ship 1.x maintenance updates if critical fixes appear.
+
+## 1.20 - 2025-09-23
+
+### Animation fixes
+- Prevented the obsolete `vhl/use-pulsing-visual-effect-p` from overriding `vhl/animation-style` when it is set via use-package's `:custom`; legacy values now only apply once the new option remains at its default `'static` ([`569a671`](https://github.com/k-talo/volatile-highlights.el/commit/569a671)).
+
+### Documentation & maintenance
+- Tidied docstrings so quoted symbols render correctly in Help "`\='symbol`" form ([`ed23e16`](https://github.com/k-talo/volatile-highlights.el/commit/ed23e16)).
+
+## 1.19 - 2025-09-21
 
 ### Animation updates
 - Introduced a new `'fade-in` animation mode and the `vhl/animation-style` defcustom (choices: `'static`, `'fade-in`, `'pulse`) ([`8752c8c`](https://github.com/k-talo/volatile-highlights.el/commit/8752c8c), [`cf3e74d`](https://github.com/k-talo/volatile-highlights.el/commit/cf3e74d), [`d82f01b`](https://github.com/k-talo/volatile-highlights.el/commit/d82f01b)).
