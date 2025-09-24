@@ -9,7 +9,7 @@
 ;; Keywords: editing emulations convenience wp
 ;; URL: https://github.com/k-talo/volatile-highlights.el
 ;; Package-Requires: ((emacs "24.4"))
-;; Version: 1.18
+;; Version: 1.20
 ;; Contributed by: Ryan Thompson and Le Wang.
 
 ;; This file is not part of GNU Emacs.
@@ -236,7 +236,7 @@
 
 ;;; Code:
 
-(defconst vhl/version "1.18")
+(defconst vhl/version "1.20")
 
 (eval-when-compile
   (require 'cl-lib)
